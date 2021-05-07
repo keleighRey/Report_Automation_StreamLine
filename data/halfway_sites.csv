@@ -1,0 +1,6 @@
+SH_SITE_ID,group,order
+10-HALF-0.1,downstream,5
+10-HALF-0.2,downstream,3
+10-HALF_T1-0.1,upstream,4
+10-HALF-0.3,upstream,2
+10-HALF-1.4,upstream,1

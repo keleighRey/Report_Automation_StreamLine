@@ -1,0 +1,640 @@
+---
+title: "StayCALM: Workflow"
+author: "Zachary M. Smith"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Workflow}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+  
+# Introduction
+  
+This provides an overview of how to apply to utilize __stayCALM__ to automate waterbody assessments according to the New York State Department of Environmental Conservation's (NYSDEC) Consolidated Assessment and Listing Methodology (CALM).
+  
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+collapse = TRUE,
+comment = "#>"
+)
+```
+
+# stayCALM Package Installation
+
+You can install the development version from [GitHub](https://github.com/) with:
+
+```{r install-github, eval=FALSE}
+install.packages("devtools")
+# Install the stayCALM package from the GitHub stayCALM repository, 
+# of the BWAM GitHub organization.
+devtools::install_github("BWAM/stayCALM")
+```
+
+You must have `rtools` installed on your machine for the stayCALM to be built upon installation from GitHub. `rtools` is __NOT__ an R package. On Windows machines, `rtools` can be installed from the following CRAN repository: https://cran.r-project.org/bin/windows/Rtools/. Be sure to follow the instructions under the header "Putting Rtools on the PATH."
+
+# Prepare the R Environment
+
+Load the necessary R packages into the global environment, including the __stayCALM__ package.
+```{r load-packages, message=FALSE}
+# Load a collection of tidyverse packages into the environment.
+library(tidyverse)
+# Load the stayCALM package into the environment.
+library(stayCALM)
+```
+
+## Establish File Output Directory
+
+Determine the root directory of the R project file currently being utilized. This directory will differ between machine it is executed on.
+```{r}
+# Extract the package root with base R functions.
+# This directory will provide relative paths between machines.
+root.dir <- gsub("(stayCALM)(.*$)", "\\1", getwd())
+```
+
+Specify if you want CSV tables to be export when compiling the document.
+
++ TRUE = Yes, export CSV tables.
++ FALSE = No, do not export CSV tables.
+```{r}
+# This argument is supplied to the Rmarkdown code chunk options.
+export.logical <- TRUE
+```
+
+# Preprocess Data
+
+## Water Quality Standards
+
+The table includes all of the necessary information to compare sampled data to NYSDEC's water quality standards (WQS).
+```{r}
+wqs.df <- stayCALM::nysdec_wqs
+```
+
+## WI/PWL
+
+Data was preprocessed to resemble the expected output from the authoritative databases that will become available as part of the Data Modernization effort.
+```{r}
+data("wipwl.df")
+```
+
+Extract the necessary columns from WI/PWL table (`wipwl.df`) and join this information with the WQS table (`wqs.df`).
+```{r}
+wqs_wipwl.df <- wipwl.df %>%
+  # Subset columns
+  select(seg_id, class, spatial_extent, water_type) %>% 
+  # Ensure all rows are unique representations of the data.
+  distinct() %>%
+  # Join the DF with the WQS by the specified columns.
+  left_join(wqs.df,
+            by = c("class",
+                   "spatial_extent",
+                   "water_type"))
+```
+
+Export the original data as a CSV file.
+```{r, eval=export.logical}
+# Create a CSV of the data set prior to assessing.
+write.csv(wqs_wipwl.df, 
+          # Specify the file directory and name of the file.
+          file = file.path(root.dir,
+                           "data",
+                           "output",
+                           paste0(Sys.Date(),
+                                  "_stay-calm_wqs-wipwl",
+                                  ".csv")),
+          # Drop row names in the CSV output.
+          row.names = FALSE)
+```
+
+## TMDLs
+
+```{r}
+tmdls_raw <- read.csv(file.path(here::here(),
+                               "data-raw",
+                               "tmdl",
+                               "NY_TMDLs_in_ATTAINS_NYSDEC_6.3.2020_EPA3_SER.csv"),
+                     stringsAsFactors = FALSE)
+names(tmdls_raw) <- fixit::clean_strings(names(tmdls_raw))
+
+tmdls_raw$seg_id <- gsub("NY-|-\\(RESEG\\)",
+                                    "",
+                                    tmdls_raw$assessment_unit_id)
+tmdls_df <- tmdls_raw[!tmdls_raw$seg_id %in% "Not in WIPWL", ]
+
+tmdls_df$parameter <- fixit::clean_strings(tmdls_df$pollutant_name)
+tmdls_df$parameter <- ifelse(tmdls_df$parameter %in% "phosphorus_total",
+                                 "phosphorus",
+                                 tmdls_df$parameter)
+tmdls_df$parameter <- ifelse(tmdls_df$parameter %in% "sulfates",
+                                 "sulfate",
+                                 tmdls_df$parameter)
+tmdls_df$parameter <- ifelse(tmdls_df$parameter %in% "fecal_coliform",
+                                 "fecal_coliforms",
+                                 tmdls_df$parameter)
+tmdls_df$parameter <- ifelse(tmdls_df$parameter %in% "ammonia_un_ionized",
+                                 "unionized_ammonia",
+                                 tmdls_df$parameter)
+
+tmdls_df <- unique(tmdls_df[c("seg_id", "parameter")])
+tmdls_df$tmdl_present <- TRUE
+```
+
+## Observed Data
+
+Data was pre-processed to resemble the expected output from the authoritative databases.
+```{r}
+# These data sets have been added to the stayCALM package as .Rda files.
+# This data will eventually be housed in an authoritative database.
+data(smas.df) 
+data(lmas.df)
+
+# Append the SMAS and LMAS data by row.
+org.df <- rbind(smas.df, lmas.df)
+
+# # Keep only the dates within the 10-year assessment period.
+# # StayCALM will flag these dates as outside of the assessment period, but
+# # this can inflate the number of un-assessed waters reported. It is easier,
+# # to filter out the older data here if it is not of interest.
+# day_zero <- stayCALM::date_subtraction(.date = Sys.Date(),
+#                                        .subtract = "10 years")
+# org.df <- org.df[org.df$date >= day_zero, ]
+```
+
+Export the original data as a CSV file.
+```{r, eval=export.logical}
+write.csv(org.df, 
+          file = file.path(root.dir,
+                           "data",
+                           "output",
+                           paste0(Sys.Date(),
+                                  "_stay-calm_original-data",
+                                  ".csv")),
+          row.names = FALSE)
+```
+
+```{r, eval=FALSE}
+sub_param.df <- subset(x = org.df,
+                       subset = parameter %in% c("hardness", "ph", "temperature"))
+
+sub_wtype.df <- unique(subset(x = wqs_wipwl.df,
+                              select = c("seg_id", "water_type")))
+
+merged.df <- merge(x = sub_param.df, 
+                   y = sub_wtype.df,
+                   by = "seg_id")
+
+wtype.list <- split(x = merged.df, f = merged.df$water_type)
+
+ponded.df <- wtype.list$pond
+
+param.list <- split(x = ponded.df, f = ponded.df[["parameter"]])
+
+ph.df <- param.list$ph
+
+
+
+assign_epi_hypo <- function(.x, .depth, .info_type) {
+  depth.vec <- .x[[.depth]]
+  epi.sub <- subset(x = .x, subset = depth.vec >= 0 & depth.vec <= 2)
+  epi.sub[.info_type] <- "ow" # Epilimnion code
+  
+  .x$max_depth <- max(depth.vec, na.rm = TRUE) # Calc max once
+  hypo.sub <- subset(x = .x,
+                     subset = depth <= max_depth & depth >= (max_depth - 1))
+  hypo.sub$info_type <- "bw" # Hypolimnion code
+  
+  final.df <- rbind(epi.sub, hypo.sub)
+}
+
+ph.df2 <- assign_epi_hypo(.x = ph.df,
+                          .depth = "depth",
+                          .info_type = "info_type")
+
+ph.df$temp_id <- group_id(.data = ph.df,
+                                  .keep = c("seg_id",
+                                            "sample_id",
+                                            "date",
+                                            "parameter",
+                                            "fraction"),
+                                  .numeric = TRUE)
+
+
+epi.list <- by(data = epi.sub,
+             INDICES = epi.sub$temp_id,
+             FUN = function(i) {
+               new.df <- unique(subset(x = i,
+                                       select = -c(value, depth)))
+               new.df$value <- median(i[["value"]])
+               new.df$info_type <- "ow" # Epilimnion code
+               new.df$depth <- NA_integer_
+               return(new.df)
+             },
+             simplify = FALSE)
+epi.df <- do.call(rbind, epi.list)
+
+```
+
+```{r}
+chem_extract.df <- org.df %>% 
+  filter(parameter %in% c("hardness", "ph", "temperature")) %>% 
+  tidyr::pivot_wider(
+    id_cols = sample_id,
+    names_from = "parameter",
+    values_from = c("value", "units"),
+    names_sep = "_",
+    values_fn = list(value = mean,
+                     units = unique,
+                     na.rm = TRUE)
+  ) %>% 
+  right_join(org.df, by = "sample_id")
+
+# .data <- org.df
+# params.vec <- c("hardness", "ph", "temperature")
+# 
+# test <- function(...) {
+#   unlist(list(...))
+# }
+# 
+# test1 <- test("hardness", "ph", "temperature")
+# 
+# extract_params <- function(.data , ..., .by_col) {
+#   sub.df <- subset(.data, select = unlist(list(...)))
+#   
+#   chem_extract.df <- 
+#   tidyr::pivot_wider(
+#     id_cols = sample_id,
+#     names_from = "parameter",
+#     values_from = c("value", "units"),
+#     names_sep = "_",
+#     values_fn = list(value = mean,
+#                      units = unique,
+#                      na.rm = TRUE)
+#   ) %>% 
+#   right_join(org.df, by = "sample_id")
+#   
+#   final.df <- merge(.data, chem_extract.df, by = .by_col)
+# }
+
+```
+
+Perform an inner-join with the observed chemical parameter data with the associated WQS and WI/PWL information. An inner-join refers to retaining only rows where a match is found between both data frames. Therefore, at this stage the parameters that are not applicable to a given segment, based on the segments waterbody class, are omitted from the assessment process.
+```{r}
+chem.df <- merge(x = chem_extract.df, 
+                 y = wqs_wipwl.df,
+                 by = c("seg_id", "parameter",
+                        "fraction", "units"))
+```
+
+A number of NYSDEC's WQS (e.g., total ammonia) are determined by other observed environmental variables, such as hardness, water-temperature, or pH. `thresh_determination` applies the appropriate formula for determining the WQS threshold for dissolved cadmium, dissolved copper, dissolved lead, dissolved nickel, dissolved silver, dissolved zinc, fluoride, and ammonia based on the environmental variables known to influence the parameter of interests values.
+```{r, warning=FALSE}
+chem.df <- thresh_determination(chem.df)
+```
+
+The `date_standard_cols` function adds four standard date columns to the data frame:
+
+1. __datetime:__ the date and time the sample was collected
+2. __date:__ the date the sample was collected
+3. __year:__ the year the sample was collected
+4. __month:__ the month the sample was collected as a character string
+
+These columns are useful for grouping the data in subsequent processes.
+```{r}
+chem.df <- date_standard_cols(.df = chem.df,
+                              .date_col = date)
+```
+
+Add an assessment ID to simplifying grouping by key fields to perform summary calculations.
+```{r}
+chem.df$assessment_id <- group_id(.data = chem.df,
+                                  .keep = c("seg_id",
+                                            "parameter",
+                                            "fraction"),
+                                  .numeric = TRUE)
+```
+
+Determine if the sample was collected within assessment period specified within the CALM. Currently, the CALM specifies that only data collected within the last ten-years will be utilized for assessments. The `assessment_period` function identifies if the sample was collected (`.date_vec = chem.df$date`) within the specified period (`.n_years_ago = 10`). The `.n_years_ago` can be updated with an integer value if this time period changes in the future. Additionally, the `.n_years_ago` argument is compared against the computers date each time the function is run; therefore, this sampling period changes each day.
+```{r}
+chem.df$within_period <- assessment_period(.date_vec = chem.df$date,
+                                           .n_years_ago = 10)
+```
+
+The values are aggregated together based on the sampling block specified and the values are summarized by the a supplied statistic.
+
+There are currently five expected sampling blocks that are specified in the WQS table:
+
+1. __single:__ The value for a given parameter within a segment and the assessment period are not aggregated in anyway. The grouping value assigned is the values row number, which is unique to each row.
+2. __date:__ All values for a given parameter within a segment and the assessment period are aggregated together based on the collection date. The values are grouped by  the "assessment_id", "statistic", "date", and "within_period" columns.
+3. __all:__ All values for a given parameter within a segment and the assessment period are aggregated together. The values are grouped by "assessment_id", "statistic", and "within_period" columns.
+4. __month:__ The values for a given parameter within a segment and the assessment period are aggregated together based on the month the data was collected. The values are grouped by the "assessment_id", "statistic", "year", "month", and "within_period" columns. The "year" column must be included to ensure that data collected during the same month but during different years are not aggregated together.
+5. __30-day:__ The values for a given parameter within a segment and the assessment period are aggregated together based on 30-day rolling window. The values are first grouped by the "assessment_id", "statistic", and "within_period" columns. However, the `rolling` function is subsequently supplied to aggregate the data by a rolling 30-day window.
+
+There are currently seven expected "statistic" inputs:
+
+
+```{r}
+prepped.df <- prep_values(.data = chem.df,
+                          .block_col = "block",
+                          .value_col = "value",
+                          .statistic_col = "statistic",
+                          .new_value_col = "result",
+                          .min_n_col = "min_n")
+```
+
+
+```{r}
+prepped_tmdls_df <-
+  merge(prepped.df,
+        tmdls_df,
+        by = c("seg_id", "parameter"),
+        all.x = TRUE)
+
+prepped_tmdls_df$tmdl_present <-
+  ifelse(is.na(prepped_tmdls_df$tmdl_present),
+         FALSE,
+         prepped_tmdls_df$tmdl_present)
+```
+
+```{r}
+selected.df <-
+  subset(
+    prepped_tmdls_df,
+    select = c(
+      "assessment_id",
+      "seg_id",
+      "site_id",
+      "water_type",
+      "type",
+      "use",
+      "standard_type",
+      "group",
+      "block",
+      "statistic",
+      "parameter",
+      "fraction",
+      "units",
+      "result",
+      "date",
+      "year",
+      "within_period",
+      "direction",
+      "threshold",
+      "summarize_rows",
+      "summarize_rows_operator",
+      "wqs_75p_threshold",
+      "tmdl_present",
+      "data_provider"
+    )
+  )
+```
+
+```{r}
+selected.df$attaining_wqs <- attaining(selected.df$result,
+                                       selected.df$direction,
+                                       selected.df$threshold)
+
+selected.df$attaining_75 <- attaining(selected.df$result,
+                                      selected.df$direction,
+                                      selected.df$wqs_75p_threshold)
+```
+
+```{r}
+selected.df$survey_id <- group_id(
+  .data = selected.df,
+  .keep = c("seg_id",
+            "use", "type",
+            "parameter",
+            "within_period"),
+  .numeric = TRUE
+)
+surveyed.df <- with(
+  selected.df,
+  survey(
+    .id = survey_id,
+    .attaining_wqs = attaining_wqs,
+    .attaining_75 = attaining_75,
+    .year = year,
+    .water_type = water_type,
+    .tmdl = tmdl_present,
+    .ltco = FALSE,
+    .pollutant = FALSE,
+    .id_col_name = "survey_id"
+  )
+)
+```
+
+```{r}
+merged.df <- merge(surveyed.df, selected.df, by = "survey_id", all = TRUE)
+status.df <- assign_status(merged.df, .eval_colname = "parameter_evaluation") %>% 
+  separate_rows(use, sep = "; ")
+
+# error.df <- status.df[status.df$use_assessment %in% 'ERROR', ]
+error.df<- subset(status.df, apply(status.df, 1, function(x) {any(x == "ERROR")}))
+if (nrow(error.df) > 0) stop("Errors found! Review 'error.df.'")
+# table(status.df$assessment)
+```
+
+
+```{r}
+uses.vec <- c("fishing",
+              "primary contact recreation",
+              "secondary contact recreation",
+              "shellfishing",
+              "source of water supply")
+
+wipwl_expanded.df <- expand_df(.data = wipwl.df,
+                               .key_col = "seg_id",
+                               .expand_vec = uses.vec,
+                               all = TRUE)
+wipwl_expanded.df <- subset(x = wipwl_expanded.df,
+                            subset = seg_id %in% unique(status.df$seg_id))
+
+names(wipwl_expanded.df)[names(wipwl_expanded.df) %in% "wbcatgry"] <- "previous_wb_category"
+
+# wipwl_expanded.df <- wipwl_expanded.df[!names(wipwl_expanded.df) %in% "use"]
+
+report_master.df <- merge(status.df, wipwl_expanded.df,
+                          by = c("seg_id", "water_type", "use"),
+                          all = TRUE)
+
+report_master.df$rev_date <- Sys.Date()
+
+```
+
+```{r}
+report_master.df <- report_master.df %>%
+  assign_assess_hier(.col = "ir_category",
+                     .type = "ir",
+                     .assign_unassessed = TRUE) %>%
+  assign_assess_hier(.col = "use_assessment",
+                     .type = "assess",
+                     .assign_unassessed = TRUE) %>%
+  assign_assess_hier(.col = "use_assessment_confirmation",
+                     .type = "confir",
+                     .assign_unassessed = TRUE)
+```
+
+```{r}
+report_master.df <-
+  summarize_seg_assessment(
+    .data = report_master.df,
+    .seg_id_col = "seg_id",
+    .ir_col = "ir_category",
+    .assess_col = "use_assessment",
+    .confir_col = "use_assessment_confirmation"
+  )
+```
+
+
+```{r}
+report_master.df <- assign_wb_category(
+  .data = report_master.df,
+  .assess_col = "segment_assessment",
+  .wb_col = "wb_category",
+  .seg_id_col = "seg_id",
+  .param_eval_col = "parameter_evaluation"
+)
+```
+
+
+```{r}
+master_sub_cols.vec <- c("seg_id",
+                         "water_type",
+                         "wb_category",
+                         "segment_assessment",
+                         "class",
+                         "use", 
+                         "type",
+                         "standard_type",
+                         "site_id",
+                         "date",
+                         "parameter", #pollutant
+                         "fraction",
+                         "units",
+                         "result",
+                         "direction",
+                         "threshold",
+                         "wqs_75p_threshold",
+                         "parameter_evaluation",
+                         "wqs_violation",
+                         "wqs_75_violation",
+                         "win", "previous_wb_category", "rev_date",
+                         "type_name", "lgth_area", "lgth_area_units",
+                         "basin_name", "huc_10", "co_name",
+                         "seg_desc",
+                         "x303dlist",
+                         "data_provider")
+
+# report_cols.vec[!report_cols.vec %in% names(report_master.df)]
+
+report_simple.df <- unique(subset(report_master.df,
+                                  select = master_sub_cols.vec))
+
+report_simple.df$water_type <-
+  ifelse(
+    report_simple.df$water_type %in% "flow",
+    "Flowing",
+    ifelse(
+      report_simple.df$water_type %in% "pond",
+      "Ponded",
+      report_simple.df$water_type
+    )
+  )
+```
+
+
+```{r, eval=export.logical}
+data_filename.vec <- paste0(Sys.Date(),
+                                  "_stayCALM_assessment",
+                                  ".csv")
+write.csv(report_simple.df, 
+          file = file.path(root.dir,
+                           "data",
+                           "output",
+                           data_filename.vec),
+          row.names = FALSE)
+```
+
+Plot the number (count) of each assessment category per waterbody type. This plot provides a quick visual summary of the output of the assessment performed.
+```{r, fig.width=8, fig.height=4}
+report_simple.df %>%
+  select(seg_id, wb_category, type_name) %>%
+  distinct() %>%
+  ggplot(aes(wb_category, fill = wb_category)) +
+  scale_fill_viridis_d() +
+  geom_bar() +
+  theme_bw()  +
+  theme(
+    axis.title.x = element_blank(),
+    axis.text.x = element_blank(),
+    axis.ticks.x = element_blank(),
+    legend.title = element_blank()
+  ) +
+  facet_wrap( ~ type_name, ncol = 4) +
+  guides(fill = guide_legend(nrow = 3)) +
+  theme(legend.position = "bottom",
+        legend.direction = "horizontal")
+```
+
+Plot the number (count) of each assessment category per waterbody type. This plot provides a quick visual summary of the output of the assessment performed.
+```{r, fig.width=8, fig.height=4}
+report_simple.df %>%
+  select(seg_id, segment_assessment, type_name) %>%
+  distinct() %>%
+  ggplot(aes(segment_assessment, fill = segment_assessment)) +
+  scale_fill_viridis_d() +
+  geom_bar() +
+  theme_bw()  +
+  theme(
+    axis.title.x = element_blank(),
+    axis.text.x = element_blank(),
+    axis.ticks.x = element_blank(),
+    legend.title = element_blank()
+  ) +
+  facet_wrap( ~ type_name, ncol = 4) +
+  guides(fill = guide_legend(nrow = 3)) +
+  theme(legend.position = "bottom",
+        legend.direction = "horizontal")
+```
+
+```{r}
+lapply(c("All Waterbodies", unique(report_simple.df$water_type)),
+       function(water_type.i) {
+  print(water_type.i)
+  options(knitr.duplicate.label = "allow")
+  rmarkdown::render(input = file.path(root.dir,
+                                    "analyses",
+                                    "calm_comparisons",
+                                    "summary_of_changes_v2.Rmd"),
+                  params = list(watertype = water_type.i,
+                                csv = data_filename.vec,
+                                DT = TRUE),
+                  output_dir = file.path(root.dir,
+                                         "analyses",
+                                         "calm_comparisons",
+                                         "reports",
+                                         Sys.Date()),
+                  output_file = paste0(Sys.Date(), "_", 
+                                       str_replace_all(water_type.i, "/", "-"),
+                                       ".HTML"),
+                  envir = new.env(),
+                  quiet = TRUE)
+ 
+}
+)
+```
+
+# Reproducibility
+
+<details><summary>Reproducibility Receipt</summary>
+
+```{r}
+Sys.Date()
+
+git2r::repository()
+
+sessioninfo::session_info()
+```
+
+</details>
+
+

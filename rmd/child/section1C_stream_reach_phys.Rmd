@@ -1,0 +1,45 @@
+---
+title: "section1C_stream_reach_physical_char"
+author: 'NYSDEC SMAS : Keleigh Reynolds'
+date: "4/16/2020"
+output:
+  word_document: default
+---
+
+Assessments of physical habitat conditions were performed by field crews at sites along with macroinvertebrate collections following the methods detailed in section 9.10 of SOP #208-19. Each habitat category was averaged over the two years of sampling conducted at each location. The information collected in these assessments are used to calculate the Habitat Model Affinity (HMA) (Table 3), an overall estimate of habitat quality which describes potential habitat stress on aquatic life. The HMA is based on rankings of individual habitat characteristics on a scale from 0 (poor) to 20 (optimal) which are then compared to a statewide reference condition (Appendix III). HMA scores are used to make final physical habitat assessments; Natural (80-100), Altered (70 – 80), Moderate (60 – 70), and Severe (< 60). Results are described in terms of percent similarity to the reference condition. 
+
+Habitat model affinity (HMA) scores and resulting final physical habitat assessments ranged from natural to severe alteration across all sites (SOP #208-19; Table\@ref(tab:Habitat-table)). Physical habitat final assessments demonstrate that habitat may have been a factor influencing benthic communities at sampling locations where HMA scores indicate moderate or severely altered conditions (Table\@ref(tab:Habitat-table)); natural (n=`r sum(HMA_counts$Assessment=="Natural")`), altered (n=`r sum(HMA_counts$Assessment=="Altered")`), moderate (n=`r sum(HMA_counts$Assessment=="Moderate")`), severe (n=`r sum(HMA_counts$Assessment=="Severe")`).
+
+<!---BLOCK_LANDSCAPE_START--->
+
+```{r tab.id="Habitat-table", tab.cap="Ranked habitat characteristics and calculated HMA. Epifaunal substrate (Epi. Cover); Embeddedness/Pool Substrate Characterization (Embed. Pool.); Velocity Depth Regime/Pool Variability (Vel/Dep Reg.); Sediment Deposition (Sed. Dep.); Channel Flow Status (Flow Status); Channel Alteration (Chan. Alt.); Riffle Frequency/Stream Sinuosity (Rif. Freq.); Left and Right Bank Stability (L.B. and R.B. Stability); Left and Right Bank Vegetation (L.B. and R.B. Veg); Width of Left and Right Bank Vegetative Zone (L.B. and R.B. Veg Zone); Habitat Model Affinity Score (HMA Score); HMA Assessment (HMA Assess.)", echo=FALSE, message=FALSE,warning=FALSE}
+
+#call the function
+tl<-table.f(habit.hma[,c(38,1,2:15,36,37)],2,17)
+
+#this part might have to be figured out later, with a larger caption/table function? Not sure yet.
+
+
+
+tl<-tl%>%
+  #width(j=1:18, width=0.4)%>%
+  #width(j=c(4,5,10,11), width = 0.5)%>%
+  #width(j=c(17), width=0.6)%>%
+  #width(j=1, width=0.8) %>% 
+  fit_to_width(max_width = 10.5) %>% 
+  flextable::merge_v(j=c("PWL")) %>% 
+  fix_border_issues() %>% 
+  theme_zebra() %>% 
+  flextable::bg(j=1,part = "body",bg = "white") %>% 
+  flextable::border(part = "body",border.bottom = officer::fp_border(color="grey")) %>% 
+  flextable::border(part = "body",j=1,border.right = officer::fp_border(color = "grey")) %>% 
+  fontsize(size=9, part = "all")
+  
+
+tl
+
+
+```
+
+<!---BLOCK_LANDSCAPE_STOP--->
+

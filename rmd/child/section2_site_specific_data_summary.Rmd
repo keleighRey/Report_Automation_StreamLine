@@ -1,0 +1,219 @@
+---
+title: "section2_sitespecificData"
+author: 'NYSDEC SMAS : Keleigh Reynolds'
+date: "4/24/2020"
+output:
+  word_document: default
+params:
+    tox: FALSE
+    study_name: "Halfway Creek Monitoring"
+    year_input: 2010
+    intro_file_name: "halfway_intro.csv"
+    sites_file_name: "halfway_sites.csv"
+    updated_sites_file_name: "halfway_sites_to_assign_order.csv"
+    map_zoom: 12     
+---
+Section II provides a summary of results from each sampling location. Data provided includes waterbody class and WI/PWL number along with a summary of general chemistry, in situ chemistry results, BAP scores and instantaneous discharge. Water chemistry results are summarized by number of records reported after quality assurance (Appendix V), exceedances of water quality standards and a statistical summary that includes mean, median, minimum, and maximum concentrations. Specific exceedances of water quality standards are also specified. Complete, quality assured raw chemistry data results accompanied by all applicable standards are available in electronic form (attached). BAP scores are provided and include a statistical summary of results for each site that includes mean, impairment threshold, minimum, maximum, standard deviation and standard error. Instantaneous stream discharge (cubic feet/second) is reported for dates when conditions allowed safe, wadeable access to streams (RAS QAPP (17-19); SOP #210-19).
+
+```{r setup, include=FALSE,message=FALSE,warning=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(stringr)
+library(dplyr)
+
+study_name=params$study_name
+tox=params$tox
+intro_file_name=params$intro_file_name
+sites_file_name=params$sites_file_name
+year.input=params$year_input
+updated_sites_file_name=params$updated_sites_file_name
+year_input=params$year_input
+map_zoom=params$map_zoom
+
+
+source(here::here("rmd/r_scripts_raw/preprocessing_7_sect_2.R"))
+
+#disable the scientific notation 
+options(scipen=9999)
+
+```
+
+
+```{r include=FALSE}
+#FUNCTIONS
+
+table.f<-function(df,x,y){
+ 
+  tl<-flextable::flextable(df) %>% 
+    flextable::font(i = NULL, j = NULL, fontname="Arial", part = "all") %>% 
+    flextable::theme_zebra() %>% 
+    flextable::autofit()
+tl<- flextable::align(tl, i = NULL, j =(x:y) , align = "center", part = "all")
+tl<-flextable::fit_to_width(tl,max_width = 7.5)
+tl<-flextable::fontsize(tl, i = NULL, j = NULL, size = 9, part = "body")
+return(tl)
+}
+
+#get pwl lines for map
+#mapl<-read.csv(here::here("data","map_lines_use.csv"),stringsAsFactors = FALSE)
+
+#map function
+map.me<-function(df1,df2){
+  #bounding box
+library(ggmap)
+nybox<-make_bbox(df1,lon=SITE_LONGITUDE,lat=SITE_LATITUDE)
+ 
+ny.map<-qmap(nybox, source = "osm",color="bw",zoom=map_zoom)+
+  #geom_path(data=subset(mapl,type=="trib"),aes(x = long, y = lat,group=group),color="steelblue1",alpha=0.5,,na.rm=TRUE)+
+  #geom_path(data=subset(mapl,type=="main"),aes(x = long, y = lat,group=group),color="slateblue3",size=0.9,,na.rm=TRUE)+
+geom_point(data=df1,aes(x=SITE_LONGITUDE,y=SITE_LATITUDE),
+                  color="yellow",size=4)+
+  geom_point(data=df2,aes(x=SITE_LONGITUDE,y=SITE_LATITUDE),color="red",size=4)
+  
+print(ny.map)
+  
+}
+
+#table.f<-function(df, center.cols){
+ 
+ # tl<-flextable::flextable(df) %>% 
+  #  flextable::font(i = NULL, j = NULL, fontname="Arial", part = "all") %>% 
+   # flextable::theme_zebra() %>% 
+    #flextable::autofit()
+#tl<- flextable::align(tl, i = NULL, j = center.cols, align = "center", part = "all")
+#return(tl)
+#}
+#table.f(mer_short.df, c("min", "max")) %>% 
+ # flextable::align(i = NULL, j = "SITE_ID", align = "center", part = "all")
+
+#x.vec
+```
+
+```{r,warning=FALSE, echo=FALSE,message=FALSE, results='asis',fig.align="center"}
+
+
+sites<-sites %>% 
+  arrange(order)
+sites$order<-as.numeric(sites$order)
+sites$SITE_HISTORY_ID<-fct_reorder(sites$SITE_HISTORY_ID,sites$order)
+
+sites.l<-unique(sites$SITE_HISTORY_ID)
+
+ for (i in seq_along(sites.l)) { 
+   # print(i)
+  site.loc.small<-sites[sites$SITE_HISTORY_ID %in% sites.l[i],]
+   
+  stds_small<-unique(site.loc.small$SITE_WATER_QLTY_STANDARD)
+  stds_small<-toupper(stds_small)
+  site<-unique(site.loc.small$SITE_HISTORY_ID)
+  
+  pwl_small<-unique(site.loc.small$SITE_PWL_ID)
+  
+   
+   cat("  \n\n###  ",paste(sites.l[i]), "| Waterbody Class:",stds_small,"| PWL_ID:",pwl_small)
+
+
+   map.me(sites,site.loc.small)
+   
+  temp.stds<-wqs_table %>% 
+    filter(`Waterbody Class`==stds_small) %>% 
+    distinct()
+  
+  list.params<-temp6[temp6$site_id %in% sites.l[i],]
+  
+  list.params.l<-unique(list.params$parameter)
+  
+  temp.stds<-temp.stds %>% 
+    subset(Parameter %in% list.params.l)
+  
+  tab<-table.f(temp.stds,2,max(ncol(temp.stds)))
+  label=paste("Applicable Standards:",sites.l[i])
+  tab<-flextable::set_caption(tab,label)
+  flextable::docx_value(tab)
+  flextable::fit_to_width(tab,max_width = 6)
+  rm(temp)
+   cat("  \n")
+   cat("<br><br>")
+  
+  temp <-chem_sum.df[chem_sum.df$SITE_ID %in% sites.l[i], ]
+  temp$SITE_ID<-NULL
+  
+  tab1<-table.f(temp, 2,max(ncol(temp)))
+  label=paste("Chemistry Measurements:",sites.l[i])
+  tab1<-flextable::set_caption(tab1,label)
+   flextable::docx_value(tab1)
+   flextable::fit_to_width(tab1,max_width = 6)
+   rm(temp)
+   cat("  \n")
+   cat("<br><br>")
+   
+  temp <-insitu_sum.df[insitu_sum.df$SITE_ID %in% sites.l[i], ]
+  temp$SITE_ID<-NULL
+   if (nrow(temp) > 0){tab2<-table.f(temp, 2,4)
+   label=paste("In-Situ Measurements:",sites.l[i])
+   tab2<-flextable::set_caption(tab2,label)
+   flextable::docx_value(tab2)}
+   rm(temp)
+   cat(rep("\n", 10))
+   cat("<br><br>")
+   
+   temp<-all_exceedances.df[all_exceedances.df$Site %in% sites.l[i],]
+   temp$Site<-NULL
+   temp<-temp %>% 
+     distinct() #take out the repeats
+   
+ 
+   if (nrow(temp) > 0){   
+     tab3<-table.f(temp,2,4)
+   label=paste("Water Quality Standard Violations:",sites.l[i])
+   tab3<-flextable::set_caption(tab3,label)
+   flextable::docx_value(tab3)}
+   else{
+       cat("  \n\n *Water Quality Standard Violations*")
+     cat("  \n\n There were no water quality standard violations at this site during the sampling period.")
+   }
+   rm(temp)
+     cat(rep("\n"))
+   cat("<br><br>")
+   
+  #temp <-nnc_sum.df[nnc_sum.df$SITE_ID %in% sites.l[i], ]
+  #temp$SITE_ID<-NULL
+   #if (nrow(temp) > 0){tab4<-table.f(temp, 2,4)
+   #label=paste("Numeric Nutrient Criteria:",sites.l[i])
+   #tab4<-flextable::set_caption(tab4,label)
+   #flextable::docx_value(tab4)}
+   #rm(temp)
+   #cat("  \n")
+   #cat("<br><br>")
+  
+  temp<-bap.df[bap.df$MSSIH_EVENT_SMAS_HISTORY_ID %in% sites.l[i], ]
+  temp$MSSIH_EVENT_SMAS_HISTORY_ID<-NULL
+  if (nrow(temp) > 0){
+  tab6<-table.f(temp,1,2)
+  label=paste("Biological Assessment Score (BAP) Summary: ",sites.l[i])
+  tab6<-flextable::set_caption(tab6,label)
+  flextable::docx_value(tab6)}
+  rm(temp)
+  cat("  \n")
+  cat("<br><br>")
+  
+  temp<-flow[flow$SEIH_EVENT_SMAS_HISTORY_ID%in% sites.l[i], ]
+  if (nrow(temp) > 0) {
+    library(ggplot2)
+    tab5<-ggplot(temp,aes(SEIH_EVENT_SMAS_SAMPLE_DATE,SEIH_TOTAL_DISCH)) +
+      geom_point()+
+        ylab("cfs")+
+      xlab("Discharge measured in cubic feet per second (cfs).")+
+      scale_x_date(date_labels = "%b %Y")
+    print(tab5)
+    rm(temp)
+  }
+
+
+  cat("  \n")
+  
+ }
+
+    # create plot for each PWL in df 
+    
+```

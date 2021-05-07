@@ -1,0 +1,40 @@
+CHEM_PARAMETER_NAME,Analytes,Analytical Lab,Standard Method,Precision,Accuracy,Cal-initial,cal-ongoing,cal-blanks,Method Detection Limit,Reporting Limit
+TEMPERATURE,Temperature,in situ,2550 B,± 1oC,± 1.5oC,Factory Set,~,~,~,~
+DISSOLVED OXYGEN,Dissolved Oxygen,in situ,4500-O G,± 1%,± 2%,Daily,~,~,~,~
+PH,pH,in situ,4500-H+B,± .05 SU,± .2 SU,Weekly,~,~,~,~
+SALINITY,Salinity,in situ,Calculated,0.001 ppt,± 1%,N/A,~,~,~,~
+SPECIFIC CONDUCTANCE,Specific Conductance,in situ,2510 B,± 1µs/cm,± 1%,Weekly,~,~,~,~
+"NITROGEN, AMMONIA (AS N)",Ammonia,ALS,D6919-09,^,± 20%,As needed,Every 10,Every 10,0.008 mg/L,0.01 mg/L
+"NITROGEN, KJELDAHL, TOTAL",Total Kjeldahl Nitrogen,ALS,EPA 351.2,^,± 20%,Daily,Every 10,Every 10,0.08 mg/L,0.1 mg/L
+"NITROGEN, NITRATE (AS N)","Nitrogen, Nitrate",ALS,EPA 353.2,^,± 20%,Daily,Every 10,Every 10,0.02 mg/L,0.05 mg/L
+"NITROGEN, TOTAL","Nitrogen, Total",ALS,Calculated,^,,,,,,
+"PHOSPHORUS, TOTAL",Total Phosphorus,ALS,EPA 365.1,^,± 20%,Daily,Every 10,Every 10,0.002 mg/L,0.003 mg/L
+"PHOSPHORUS, DISSOLVED ORTHOPHOSPHATE (AS P)",Ortho-phosphate,ALS,EPA 365.1,^,± 20%,Daily,Every 10,Every 10,0.001 mg/L,0.005 mg/L
+TOTAL DISSOLVED SOLIDS,Total Dissolved Solids,ALS,SM 2540C,^,± 20%,Daily,Every 20,Every 20,4.0 mg/L,10 mg/L
+TURBIDITY,Turbidity,ALS,EPA 180.1,^,± 10%,Daily,Every 10,Every 10,0.06 NTU,0.1 NTU
+"CARBON, DISSOLVED ORGANIC (DOC)",Dissolved Organic Carbon,ALS,5310C,^,± 20%,As needed,Ever 10,Every 10,0.4 mg/L,10 mg/L
+"ALKALINITY, TOTAL (AS CACO3)",Alkalinity,ALS,SM 2320B,^,± 20%,Daily,Every 10,Every 10,1.0 mg/L,2.0 mg/L
+HARDNESS (AS CACO3),Hardness,ALS,SM 2340C,^,± 20%,Daily,Every 10,Every 10,0.3 mg/L,2.0 mg/L
+CALCIUM,Calcium,ALS,EPA 200.7,^,± 20%,Daily,Every 10,Every 10,0.1 mg/L,1.0 mg/L
+MAGNESIUM,Magnesium,ALS,EPA 200.7,^,± 20%,Daily,Every 10,Every 10,0.04 mg/L,1.0 mg/L
+POTASSIUM ,Potassium ,ALS,EPA 200.7,^,± 20%,Daily,Every 10,Every 10,0.06 mg/L,2.0 mg/L
+SODIUM,Sodium,ALS,EPA 200.7,^,± 20%,Daily,Every 10,Every 10,0.03 mg/L,1.0 mg/L
+CHLORIDE,Chloride,ALS,EPA 300.0,^,± 20%,As needed,Every 10,Every 10,0.02 mg/L,0.2 mg/L
+FLUORIDE,Fluoride,ALS,EPA 300.0,^,± 20%,As needed,Every 10,Every 10,0.004 mg/L,0.1 mg/L
+SULFATE,Sulfate,ALS,EPA 300.0,^,± 20%,As needed,Every 10,Every 10,0.02 mg/L,0.2 mg/L
+IRON,Iron (total),ALS,EPA 200.7,^,± 20%,Daily,Every 10,Every 10,6 µ/L,100 µ/L
+MANGANESE,Manganese (total),ALS,EPA 200.7,^,± 20%,Daily,Every 10,Every 10,0.5 µ/L,10 µ/L
+ARSENIC,Arsenic (total),ALS,EPA 200.8,^,± 20%,Daily,Every 10,Every 10,0.3 µ/L,1 µ/L
+SILVER,Silver (total),ALS,EPA 200.8,^,± 20%,Daily,Every 10,Every 10,0.07 µ/L,1 µ/L
+ALUMINUM,Aluminum (total),ALS,EPA 200.8,^,± 20%,Daily,Every 10,Every 10,4.0 µ/L,50 µ/L
+CADMIUM,Cadmium (total),ALS,EPA 200.8,^,± 20%,Daily,Every 10,Every 10,0.03 µ/L,1 µ/L
+COPPER,Copper (total),ALS,EPA 200.8,^,± 20%,Daily,Every 10,Every 10,0.04 µ/L,1 µ/L
+LEAD,Lead (total),ALS,EPA 200.8,^,± 20%,Daily,Every 10,Every 10,0.08 µ/L,1 µ/L
+NICKEL,Nickel (total),ALS,EPA 200.8,^,± 20%,Daily,Every 10,Every 10,0.04 µ/L,1 µ/L
+ZINC,Zinc (total),ALS,EPA 200.8,^,± 20%,Daily,Every 10,Every 10,0.7 µ/L,10 µ/L
+ALUMINUM,Aluminum (dissolved),ALS,EPA 200.8,^,± 20%,Daily,Every 10,Every 10,0.9 µ/L,10 µ/L
+CADMIUM,Cadmium (dissolved),ALS,EPA 200.8,^,± 20%,Daily,Every 10,Every 10,0.02 µ/L,1 µ/L
+COPPER,Copper (dissolved),ALS,EPA 200.8,^,± 20%,Daily,Every 10,Every 10,0.02 µ/L,1 µ/L
+LEAD,Lead (dissolved),ALS,EPA 200.8,^,± 20%,Daily,Every 10,Every 10,0.02 µ/L,1 µ/L
+NICKEL,Nickel (dissolved),ALS,EPA 200.8,^,± 20%,Daily,Every 10,Every 10,0.1 µ/L,1 µ/L
+ZINC,Zinc (dissolved),ALS,EPA 200.8,^,± 20%,Daily,Every 10,Every 10,3 µ/L,5 µ/L

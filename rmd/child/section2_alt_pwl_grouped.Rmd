@@ -1,0 +1,20 @@
+---
+title: "section2_sitespecificData"
+author: 'NYSDEC SMAS : Keleigh Reynolds'
+date: "4/24/2020"
+output:
+  word_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(stringr)
+library(dplyr)
+```
+
+
+Section II provides a summary of results from each sampling location. Data provided includes waterbody class and WI/PWL number along with a summary of general chemistry, in situ chemistry results, BAP scores and instantaneous discharge. Water chemistry results are summarized by number of records reported after quality assurance (Appendix III), exceedances of water quality standards and a statistical summary that includes mean, median, minimum, and maximum concentrations. Specific exceedances of water quality standards are also specified. Complete, quality assured raw chemistry data results accompanied by all applicable standards are available in Attachment I. BAP scores are provided and include a statistical summary of results for each site that includes mean, impairment threshold, minimum, maximum, standard deviation and standard error. Instantaneous stream discharge (cubic feet/second) is reported for dates when conditions allowed safe, wadeable access to streams (RAS QAPP (17-19); SOP #210-19). 
+
+

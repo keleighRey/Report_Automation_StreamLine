@@ -1,0 +1,102 @@
+---
+date: "`r Sys.Date()`"
+author: "NYSDEC SMAS"
+title: "Halfway Creek Monitoring Reporting Draft"
+output: 
+  officedown::rdocx_document:
+     reference_docx: draft_template.docx
+params:
+    tox: FALSE
+    study_name: "Halfway Creek Monitoring"
+    year_input: 2010
+    intro_file_name: "halfway_intro.csv"
+    sites_file_name: "halfway_sites.csv"
+    grouping_for_chem: site
+    grouping_for_bap: site
+    map_zoom: 15
+    user: kareynol
+      
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, fig.cap = TRUE)
+library(officedown)
+library(officer)
+
+fp <- fp_par(
+  text.align = "center", 
+  padding.bottom = 20, padding.top = 120, 
+  border.bottom = fp_border())
+
+ft <- fp_text(shading.color='#EFEFEF', bold = TRUE)
+
+study_name=params$study_name
+tox=params$tox
+intro_file_name=params$intro_file_name
+sites_file_name=params$sites_file_name
+year.input=params$year_input
+#updated_sites_file_name=params$updated_sites_file_name
+#updated_sites_file_name: "halfway_sites_to_assign_order.csv"
+grouping_for_bap=params$grouping_for_bap
+grouping_for_chem=params$grouping_for_chem
+map_zoom=params$map_zoom
+user=params$user
+
+```
+
+
+```{r message=FALSE,warning=FALSE,echo=FALSE}
+
+year_input=params$year_input
+source(here::here("rmd/r_scripts_raw/stayCALM_exceedances.R"))
+source(here::here("rmd/r_scripts_raw/functions.R"))
+source(here::here("rmd/r_scripts_raw/preprocessing_1_raw.R"))
+year.input=params$year_input
+source(here::here("rmd/r_scripts_raw/preprocessing_2_chemistry.R"))
+source(here::here("rmd/r_scripts_raw/preprocessing_3_bap.R"))
+source(here::here("rmd/r_scripts_raw/preprocessing_4_habitat.R"))
+source(here::here("rmd/r_scripts_raw/preprocessing_5_user_perception.R"))
+source(here::here("rmd/r_scripts_raw/preprocessing_6_tox.R"))
+```
+
+\newpage
+
+
+# General
+```{r child="child/section1_General.Rmd"}
+
+```
+\newpage
+
+# Water Chemistry and Stream Discharge
+```{r child="child/section1A_chemistry_stream_discharge.Rmd"}
+
+```
+\newpage
+
+# Benthic Macroinvertebrate Community 
+```{r child="child/section1B_BAP.Rmd"}
+
+```
+\newpage
+
+# Stream Reach Physical Characteristics
+```{r child="child/section1C_stream_reach_phys.Rmd"}
+
+```
+\newpage
+
+# User Perception
+```{r child="child/section1D_User_Perception.Rmd"}
+
+```
+\newpage
+
+
+```{r child="child/section1E_tox.Rmd"}
+
+if(params$tox){cat("# Sediment and Porewater Microtox® Analysis")}
+```
+\newpage
+
+

@@ -1,0 +1,19 @@
+classification,guidance value_ug,bap_less,chla_grtr_ug,ECO_REGION,unit,type
+a,30,5,,11,mg/L,aquatic_chronic
+a-s,30,5,,11,mg/L,aquatic_chronic
+aa,30,5,,11,mg/L,aquatic_chronic
+aa-s,30,5,,11,mg/L,aquatic_chronic
+b,30,5,,11,mg/L,aquatic_chronic
+c,30,5,,11,mg/L,aquatic_chronic
+d,30,5,,11,mg/L,aquatic_chronic
+a,75,5,,7,mg/L,aquatic_chronic
+a-s,75,5,,7,mg/L,aquatic_chronic
+aa,75,5,,7,mg/L,aquatic_chronic
+aa-s,75,5,,7,mg/L,aquatic_chronic
+b,75,5,,7,mg/L,aquatic_chronic
+c,75,5,,7,mg/L,aquatic_chronic
+d,75,5,,7,mg/L,aquatic_chronic
+a,25,,0.006,7,mg/L,health_water-supply
+a-s,25,,0.006,7,mg/L,health_water-supply
+a,25,,0.006,11,mg/L,health_water-supply
+a-s,25,,0.006,11,mg/L,health_water-supply

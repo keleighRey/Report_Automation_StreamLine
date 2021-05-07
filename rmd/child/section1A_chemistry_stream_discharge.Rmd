@@ -1,0 +1,118 @@
+---
+title: "Section 1 a) chemistry and stream discharge"
+author: 'NYSDEC SMAS : Keleigh Reynolds'
+date: "4/10/2020"
+output: 
+word_document: default
+---
+
+## Water Chemistry Methodology
+SMAS  
+Methods used for water chemistry data collection are described by NYSDEC standard operating procedures (SOP). The collection of water chemistry samples followed procedures described in SOP #210(17-19) Collection of Water Column Samples for the Rotating Integrated Basin Studies (RIBS) Program. Where the depth of water permitted, water chemistry samples were collected using the depth-integrating suspended sediment sampler – wading (DH-81) method (SOP #210(17-19)), section 11.2). Where the depth of water was too shallow water chemistry samples were collected using the direct grab method (SOP #210(¬17-19), section 11.6). Water samples were processed using a contract lab with NYS Environmental Laboratory Approval Program (ELAP) certification. 
+
+Stream discharge was measured using the velocity-area method according to Turnipseed and Sauer (2010). The velocity-area method (Midsection Method) calculates discharge by subdividing a stream cross-section into 10 equally spaced stations and measuring depth and velocity within each station and summing the products (Turnipseed and Sauer, 2010). A top-set wading rod and Sontek FlowTracker was used. Methods are described in detail in Turnipseed and Sauer (2010) and Appendix I provides pertinent elements. Appendix II provides the field sheet used in collection of stream depth and velocity for discharge calculations.
+
+Ambient water chemistry sampling included in situ and lab measured water quality analytes (Table\@ref(tab:Analytes)). Where applicable, chemistry results were analyzed for exceedances of state water quality standards and summarized below using R programing software (R Core Team, 2017). All raw chemistry results (in situ and lab reported) with all applicable standards and exceedance determinations accompany this report as Attachment I.
+
+All survey data were subjected to the quality assurance/quality control (QA/QC) protocols detailed in Appendix VI. For water chemistry, an evaluation of the precision, accuracy, and completeness of processed water chemistry samples after lab analyses were performed following the methods detailed in part A of Appendix V of this report. Appendix VI.B includes a compilation of quality assurance results for each site. Only data meeting the highest data quality standard are reported and used in this report (Appendix VI).
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+#source(here::here(),
+     #  "r_scripts_raw",
+    #   "stayCALM_exceedances.R")
+
+```
+
+<!---BLOCK_LANDSCAPE_START--->
+```{r tab.id= "Analytes", tab.cap="Water chemistry analytes sampled as part of the Stream Assessment Survey. Table lists sampled analytes and analytical specifications. ^ Precision objectives are defined by results of duplicate samples as described in Appendix V", echo=FALSE, message=FALSE, warning=FALSE}
+
+library(dplyr)
+library(flextable)
+
+tl.1<-flextable(tl.1) %>% 
+  font(i = NULL, j = NULL, fontname="Arial", part = "all") %>% 
+  theme_zebra() %>% 
+  fontsize(size = 8, part="all")%>%
+  autofit()
+tl.1<-align(tl.1, i = NULL, j =(2:10) , align = "center", part = "all")%>%
+  width(j=c(6:10), width = 0.8)%>%
+  width(j=3:5, width=0.6)%>%
+  width(j=1, width=1.2)
+tl.1
+
+```
+<!---BLOCK_LANDSCAPE_STOP--->
+\newpage
+## Water Chemistry
+
+
+```{r include=FALSE,message=FALSE,warning=FALSE}
+
+#load libraries
+library(stringr)
+library(reshape2)
+library(ggplot2)
+library(ggthemes)
+library(pander)
+library(dplyr)
+library(forcats)
+
+#set group colors
+groups<-unique(sites$group)
+
+group_colors <- setNames(RColorBrewer::brewer.pal(length(levels(sites$group)), "Set1"), levels(sites$group))
+
+names(group_colors)<-c(groups)
+
+#group_colors<-c("downstream"= "tomato2", "upstream"= "springgreen4")#, "c"="deepskyblue2")
+#group_colors<-c("a"= "tomato2", "b"= "springgreen4", "c"="deepskyblue2")
+```
+
+
+```{r chemgraph1, echo=FALSE, fig.width=7.5, fig.height=6, message=FALSE, warning=FALSE, fig.cap=paste(unique(chem.trans$CHEM_PARAMETER_NAME), ", " , "The X-axis presents WI/PWL ID of the sampling locations from upstream to downstream and axis labels correspond with Table 1, Figure 1 and Figure 2. Color of the box represents the location of the WI/WPL in the watershed as indicated in the plot legend. Horizontal lines represent the 95th, 75th, and 25th percentiles of statewide data for each endpoint.", sep="")}
+
+if(nrow(chem.trans)>1 & grouping_for_chem=="site"){
+  chem.graph.site(chem.trans)
+}
+
+if(nrow(chem.trans)>1 & grouping_for_chem=="PWL"){
+  chem.graph.pwl(chem.trans)
+}
+
+
+```
+
+
+```{r turb, echo=FALSE, fig.width=7.5, fig.height=6, message=FALSE, warning=FALSE, fig.cap=paste(unique(chem.no.trans$CHEM_PARAMETER_NAME), ", " , "The X-axis presents WI/PWL ID of the sampling locations from upstream to downstream and axis labels correspond with Table 1, Figure 1 and Figure 2. Color of the box represents the location of the WI/WPL in the watershed as indicated in the plot legend. Horizontal lines represent the 95th, 75th, and 25th percentiles of statewide data for each endpoint.", sep="")}
+
+#this one for the other values (no transformation of units-In-SITU data)
+ 
+if (nrow(chem.no.trans)>0 & grouping_for_chem=="site"){
+  chem.graph.continuous.site(chem.no.trans)
+}
+
+
+if (nrow(chem.no.trans)>0 & grouping_for_chem=="PWL"){
+  chem.graph.continuous.pwl(chem.no.trans)
+}
+```
+
+
+
+```{r insituChem, echo=FALSE, fig.width=7.5, fig.height=6, message=FALSE, warning=FALSE, fig.cap=paste(unique(in.situ.short$CHEM_PARAMETER_NAME), ", " , "The X-axis presents WI/PWL ID of the sampling locations from upstream to downstream and axis labels correspond with Table 1, Figure 1 and Figure 2. Color of the box represents the location of the WI/WPL in the watershed as indicated in the plot legend. Horizontal lines represent the 95th, 75th, and 25th percentiles of statewide data for each endpoint. The total number of reported values illustrated for each sampling location can vary due to non-detection and QA/QC procedures. Descriptions of removed records are presented in Appendix V.", sep="")}
+
+#this one for the other values (no transformation of units-In-SITU data)
+ 
+if (nrow(in.situ.short)>0 & grouping_for_chem=="site"){
+  chem.graph.insitu.site(in.situ.short)
+}
+
+if (nrow(in.situ.short)>0 & grouping_for_chem=="PWL"){
+  chem.graph.insitu.pwl(in.situ.short)
+}
+
+
+```
+
+
+

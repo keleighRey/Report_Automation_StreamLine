@@ -1,0 +1,27 @@
+---
+title: "Appendix IV"
+author: 'NYSDEC SMAS : Keleigh Reynolds'
+date: "3/22/2021"
+output: 
+word_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+### Appendix IV. QA/QC Results
+
+The following tables represent all data excluded from the study, or samples that were taken during the study period but flagged for exclusion from reporting by the QA/QC methods described in SOP#110-21.
+
+```{r}
+
+```
+
+
+```{r r tab.id= "QA_rej", tab.cap="Water chemistry analytes flagged as "rejected" and not included in the analysis for the report.", echo=FALSE, message=FALSE, warning=FALSE}
+
+rej.tab<-table.f(rej,2,ncol(rej))
+rej.tab
+
+```
+
