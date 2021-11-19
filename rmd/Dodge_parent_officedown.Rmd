@@ -1,0 +1,170 @@
+---
+date: "`r Sys.Date()`"
+author: "NYSDEC SMAS"
+title: "Dodge Creek at Portville, NY"
+output: 
+  officedown::rdocx_document:
+     reference_docx: draft_template.docx
+params:
+    tox: FALSE
+    study_name: "Dodge Creek at Portville, NY"
+    year_input: 2021
+    intro_file_name: "dodge_intro.csv"
+    sites_file_name: "dodge_sites.csv"
+    grouping_for_chem: site
+    grouping_for_bap: site
+    map_zoom: 15
+    user: kareynol
+    limit_to_nuts: TRUE
+    data_package: FALSE
+    map_fiile: "map.png"
+      
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, fig.cap = TRUE)
+library(officedown)
+library(officer)
+
+fp <- fp_par(
+  text.align = "center", 
+  padding.bottom = 20, padding.top = 120, 
+  border.bottom = fp_border())
+
+ft <- fp_text(shading.color='#EFEFEF', bold = TRUE)
+
+study_name=params$study_name
+tox=params$tox
+intro_file_name=params$intro_file_name
+sites_file_name=params$sites_file_name
+year.input=params$year_input
+#updated_sites_file_name=params$updated_sites_file_name
+grouping_for_bap=params$grouping_for_bap
+grouping_for_chem=params$grouping_for_chem
+map_zoom=params$map_zoom
+user=params$user
+limit_to_nuts=params$limit_to_nuts
+data_package=params$data_package
+
+```
+
+
+```{r message=FALSE,warning=FALSE,echo=FALSE}
+
+year_input=params$year_input
+source(here::here("rmd/r_scripts_raw/stayCALM_exceedances_updated.R"))
+source(here::here("rmd/r_scripts_raw/functions.R"))
+source(here::here("rmd/r_scripts_raw/preprocessing_1_raw.R"))
+year.input=params$year_input
+source(here::here("rmd/r_scripts_raw/preprocessing_2_chemistry.R"))
+source(here::here("rmd/r_scripts_raw/preprocessing_3_bap.R"))
+source(here::here("rmd/r_scripts_raw/preprocessing_4_habitat.R"))
+source(here::here("rmd/r_scripts_raw/preprocessing_5_user_perception.R"))
+source(here::here("rmd/r_scripts_raw/preprocessing_6_tox.R"))
+source(here::here("rmd/r_scripts_raw/appendices_and_data_package.R"))
+```
+
+<!---CHUNK_PAGEBREAK--->
+
+<!---BLOCK_TOC--->
+
+<!---CHUNK_PAGEBREAK--->
+
+
+```{r gen_map, echo=FALSE,warning=FALSE,message=FALSE}
+#figure this one out eventually, maybe have Andrea's map script.
+
+
+```
+
+
+# General
+```{r child="child/section1_General.Rmd"}
+
+```
+\newpage
+
+# Benthic Macroinvertebrate Community 
+```{r child="child/section1B_BAP.Rmd"}
+
+```
+\newpage
+
+# Biological Impairment Criteria
+
+Biological assessment based on the macroinvertebrate community provide the ability to detect water quality problems that are intermittent, not detected, and/or underestimated by water chemistry sampling. Using biological sampling methods described above (SOP #208-21), criteria have been established for measuring significant biological impairment to resident aquatic life in flowing waters (Bode et al. 1995).  Using conditions upstream of a point source rather than reference condition (BAP >5.0) generate site-specific criteria and evaluates potential localized change in the macroinvertebrate community condition. 
+
+To isolate water quality as the driver of potential impact to the macroinvertebrate community, several habitat features must be measured at both sampling locations and fall within documented habitat similarity requirements (Bode et al. 1995). These habitat features are routinely collected as part of macroinvertebrate community sampling (SOP #208-21) and include: substrate particle size (within 3 phi units), along with current speed, embeddedness, and canopy cover (all within 50%).
+
+
+```{r tab.id= "hab", tab.cap="Habitat variable information collected at Dodge Creek (July 1, 2021) to evaluate potential influence of physical habitat on the macroinvertebrate community.", echo=FALSE, message=FALSE, warning=FALSE}
+
+hab<-read.csv(here::here("data/Dodge_Creek_Field/hab.csv"),stringsAsFactors = FALSE)
+
+hab<-hab %>% 
+  rename(" "=X,
+         "Phi Units"=Phi.Units,
+         'Current (cm/s)'=Current..cm.s.,
+         '% Embeddedness'=X..Embeddedness,
+         '% Canopy'=X..Canopy)
+
+table.f(hab,2,4)
+
+
+```
+
+*Determination of Significant Biological Impairment*
+
+Significant biological impairment occurs when 1 or more of the biological metrics levels exceed the criteria for impairment designated in Table 4. If the mean of one or more biological metrics exceeds the criteria, a Student’s T test is run to determine statistical significance and confirm significant biological impairment. Biological metrics include Species Richness, Ephemeroptera, Plecoptera, Trichoptera, (EPT) Richness, Biotic Index, Species Dominance, Percent Model Affinity, and BAP. Table 4 indicates no exceedances of biological impairment criteria.
+
+
+<!---BLOCK_LANDSCAPE_START--->
+
+
+```{r tab.id= "richness", tab.cap="Sampling locations, replicate metric values and means, impairment criteria thresholds for means, and indication of biological impairment criteria exceedance.", echo=FALSE, message=FALSE, warning=FALSE}
+
+richness<-read.csv(here::here("data/Dodge_Creek_Field/richness.csv"),stringsAsFactors = FALSE)
+
+richness<-richness %>% 
+  rename(" "=X,
+         'Species Richness'=Species.Richness,
+         'Species Dominance'=Species.Dominance,
+         'EPT Richness'=EPT.Richness,
+         'Biotic Index'=Biotic.Index,
+         'Species Dominance'=Species.Dominance,
+         'Percent Model Affinity'=Percent.Model.Affinity)
+
+big_border=officer::fp_border(color="gray",width=1)
+
+rich<-table.f(richness,2,4)
+flextable::bg(rich, i=4, j = NULL, bg="grey", part = "body", source = j) %>% 
+  flextable::bg(i=8, j = NULL, bg="grey", part = "body", source = j) %>% 
+    flextable::bg(i=10, j = NULL, bg="grey", part = "body", source = j) %>% 
+    flextable::bg( i=11, j = NULL, bg="grey54", part = "body", source = j) %>% 
+  border_outer(part="all", border = big_border ) %>% 
+  border_outer(part="header", border = big_border ) %>% 
+  fit_to_width(max_width=10)
+  
+  
+
+```
+
+<!---BLOCK_LANDSCAPE_STOP--->
+
+# Water Chemistry and Stream Discharge
+```{r child="child/section1A_chemistry_stream_discharge.Rmd"}
+
+```
+\newpage
+
+```{r child="child/section1E_tox.Rmd"}
+
+if(params$tox){cat("# Sediment and Porewater Microtox® Analysis")}
+```
+
+\newpage
+
+```{r child="child/appendices.Rmd"}
+
+```
+

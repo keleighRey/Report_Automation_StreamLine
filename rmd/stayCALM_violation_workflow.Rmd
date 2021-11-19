@@ -128,9 +128,10 @@ all.chemistry<-rbind(chem.good,insitu.good)
 all.chemistry$fraction<-tolower(all.chemistry$fraction)
 all.chemistry$units<-tolower(all.chemistry$units)
 
-#fix the DO fraction
+#fix the DO fraction and PH
 all.chemistry<-all.chemistry %>% 
   mutate(fraction=case_when(parameter=="DISSOLVED OXYGEN"& units=="mg/l"~"dissolved",
+                            parameter=="PH" & units=="ph units"~"total",
                             TRUE~paste(fraction)))
 
 #correct the parameter names for stayCALM
@@ -168,7 +169,7 @@ all.chemistry$sample_id<-paste(all.chemistry$site_id,all.chemistry$date_text,sep
 all.chemistry$date_text<-NULL
 
 #write to file
-write.csv(all.chemistry,here::here("outputs/keuka_prepped_good.csv"))
+write.csv(all.chemistry,here::here("outputs/dodge_prepped_good.csv"))
 
 ```
 

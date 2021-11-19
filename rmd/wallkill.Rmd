@@ -22,19 +22,19 @@ output:
         sep: '. '
 params:
     tox: FALSE
-    study_name: "Finger Lakes Advanced Monitoring"
+    study_name: "Wallkill"
     year_input: 2019
-    intro_file_name: "intro.csv"
-    sites_file_name: "sites_to_assign_order_new.csv"
-    grouping_for_chem: PWL
-    grouping_for_bap: both
+    intro_file_name: "wallkill_intro.csv"
+    sites_file_name: "sites_wallkill.csv"
+    grouping_for_chem: pwl
+    grouping_for_bap: pwl
     map_zoom: 12
     user: kareynol
     limit_to_nuts: TRUE
-    data_package: TRUE
+    data_package: FALSE
     lit_cited_file: "lit_cited.docx"
-    map_fiile: "dodge_png.png"
-      
+    map_file: "birch_map.png"
+     
 ---
 
 ```{r setup, include=FALSE}
@@ -49,23 +49,6 @@ fp <- fp_par(
 
 ft <- fp_text(shading.color='#EFEFEF', bold = TRUE)
 
-rdocx_document(tables = list(
-     style = "Table", layout = "autofit", width = 1,
-   caption = list(
-     style = "Table Caption", pre = "Table ", sep = ". "),
-   conditional = list(
-     first_row = TRUE, first_column = FALSE, last_row = FALSE,
-     last_column = FALSE, no_hband = FALSE, no_vband = TRUE)))
-
-rdocx_document(tables = list(
-     style = "Image", layout = "autofit", width = 1,
-   caption = list(
-     style = "Image Caption", pre = "Figure ", sep = ". "),
-   conditional = list(
-     first_row = TRUE, first_column = FALSE, last_row = FALSE,
-     last_column = FALSE, no_hband = FALSE, no_vband = TRUE)))
-
-
 study_name=params$study_name
 tox=params$tox
 intro_file_name=params$intro_file_name
@@ -79,6 +62,7 @@ user=params$user
 limit_to_nuts=params$limit_to_nuts
 data_package=params$data_package
 lit_cited_file=params$lit_cited_file
+map_file=params$map_file
 
 ```
 
@@ -96,36 +80,15 @@ source(here::here("rmd/r_scripts_raw/preprocessing_4_habitat.R"))
 source(here::here("rmd/r_scripts_raw/preprocessing_5_user_perception.R"))
 source(here::here("rmd/r_scripts_raw/preprocessing_6_tox.R"))
 source(here::here("rmd/r_scripts_raw/appendices_and_data_package.R"))
+source(here::here("rmd/r_scripts_raw/preprocessing_7_sect_2.R"))
+
 ```
-\begin{center} 
-
-Small Title
-
-
-
-Brian T. Duffy 
-Keleigh Reynolds  
-Jeff J. Lojpersberger 
-Meredith Streeter  
-
-
-
-
-
-
-Stream Monitoring and Assessment Section  
-New York State Department of Environmental Conservation  
-Division of Water  
-Bureau of Water Assessment and Management  
-Albany, New York  
-\end{center}
 
 <!---CHUNK_PAGEBREAK--->
 
 <!---BLOCK_TOC--->
 
 <!---CHUNK_PAGEBREAK--->
-
 
 # General
 ```{r child="child/section1_General.Rmd"}
@@ -135,13 +98,14 @@ Albany, New York
 
 # Section I: Overview
 
-```{r child="child/section1A_chemistry_stream_discharge.Rmd"}
+## Benthic Macroinvertebrate Community 
+```{r child="child/section1B_BAP.Rmd"}
 
 ```
 \newpage
 
-## Benthic Macroinvertebrate Community 
-```{r child="child/section1B_BAP.Rmd"}
+## Water Quality
+```{r child="child/section1A_chemistry_stream_discharge.Rmd"}
 
 ```
 \newpage
@@ -150,27 +114,22 @@ Albany, New York
 ```{r child="child/section1C_stream_reach_phys.Rmd"}
 
 ```
-\newpage
 
 ## User Perception
 ```{r child="child/section1D_User_Perception.Rmd"}
 
 ```
-\newpage
 
 
 ```{r child="child/section1E_tox.Rmd"}
 
 if(params$tox){cat("# Sediment and Porewater Microtox® Analysis")}
 ```
-
 \newpage
 # Section II: Site Specific Data
-
 ```{r child="child/section_2_short.Rmd"}
 #child="child/section_2_short.Rmd"
 ```
-
 \newpage
 
 # Section III: Literature Cited
@@ -179,7 +138,7 @@ if(params$tox){cat("# Sediment and Porewater Microtox® Analysis")}
 block_pour_docx(file = here::here(paste("data",lit_cited_file,sep ="/")))
 ```
 
-
+\newpage
 # Section IV: Appendices
 
 ```{r child="child/appendices.Rmd"}
