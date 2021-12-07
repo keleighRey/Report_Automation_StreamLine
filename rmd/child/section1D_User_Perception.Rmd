@@ -31,34 +31,25 @@ plot2<-ggplot(contact, aes(x=PWL, y=value, fill=`Contact Type`))+
 
 
 ```
-Perceptions of recreational ability were ranked at all sampling locations during each site visit as per standard site visit protocols (SOP #208-19). The observer ranking of recreational ability is a method of evaluating impacts to recreational use of a stream segment. Impacts to recreational use have been correlated with “impairment of aquatic life use from nutrient enrichment” and rankings below slightly impacted (rank of 3) are indicative of significant impacts to recreational ability (Smith et al. 2014). The ranking assesses primary (1°) and secondary (2°) contact recreation, as well as a user’s desire to fish.
+Perceptions of recreational ability were ranked at all sampling locations as per standard site visit protocols (SOP #208-19). The observer ranking of recreational ability is a method of evaluating impacts to recreational use of a stream segment. Impacts to recreational use have been correlated with biological impairment from nutrient enrichment and rankings above slightly impacted (rank of 3) are indicative of significant impacts to recreational ability (Smith et al., 2014). The ranking assesses primary (1°) and secondary (2°) contact recreation, as well as a user’s desire to fish.
 
-The first two questions of the recreational use evaluation describe the observers perceived ability to participate in 1° and 2° contact recreation (Appendix IV). Results of this ranking are the primary gauge of whether the `r study_name` site(s) are achieving the designated recreational uses. (Figure\@ref(fig:userP-rank)) illustrates the average observer ranking for desire to participate in 1° and 2° contact recreation at each sampling location. Results of this survey suggest observers (NYSDEC field staff) considered the desire to participate in 1° and 2° contact recreation to be slightly impacted (ranked > 3) at PWL segments `r paste(unique(slight.imp$PWL),sep=",")`,(Figure\@ref(fig:userP-rankb))
+The first two questions of the recreational use evaluation describe the observers perceived ability to participate in 1° and 2° contact recreation. Results of this ranking are the primary gauge of whether the `r study_name` sites are achieving the designated recreational uses. Figure \@ref(fig:userP-rank) illustrates the average observer ranking for desire to participate in 1° and 2° contact recreation at each sampling location. User rankings of recreational desirability ranged from 0 (best) to 5 (worst) where,as described above, a measurable impact was related to a ranking of 3 and above (Smith et al., 2014). Values of 6 were the result of 1° or 2° degree contact not being applicable due to site condition and were removed from mean aggregations. Results of this survey suggest observers (NYSDEC field staff) considered the desire to participate in 1° and 2° contact recreation to be slightly impacted (ranked > 3) at `r length(unique(slight.imp$PWL))`  WI/PWL segments `r paste(unique(slight.imp$PWL),sep=",")`(Figure \@ref(fig:userP-rankb)).
 
 ```{r  userP-rank, fig.cap="Mean observer ranking of recreational ability for each sampling location. Columns represent observer rankings for the desire to participate in 1° and 2° contact recreation. Ranking of recreation ability was performed for all locations during each site visit." , fig.width=7, fig.height=4, echo=FALSE, message=FALSE,warning=FALSE}
 plot
 ```
-```{r  userP-rankb, fig.cap="Mean observer ranking of recreational ability for sampling locations, grouped by PWL. Columns represent observer rankings for the desire to participate in 1° and 2° contact recreation. Ranking of recreation ability was performed for all locations during each site visit." , fig.width=7, fig.height=4, echo=FALSE, message=FALSE,warning=FALSE}
+
+```{r  userP-rankb, fig.cap="Mean observer ranking of recreational ability for sampling locations, grouped by WI/PWL. Columns represent observer rankings for the desire to participate in 1° and 2° contact recreation. Ranking of recreational ability was performed for all locations during each site visit." , fig.width=7, fig.height=4, echo=FALSE, message=FALSE,warning=FALSE}
 plot2
 ```
 \newpage
 
-Additional questions on a scale of 0-10 (0 – Best/Natural; 10 Worst/Severe) help determine the factors influencing the user’s perception. Those factors are: 1) Water Clarity; 2) Trash; 3) Periphyton; 4) Odor; 5) Discharge Pipes. (Table\@ref(tab:UserP-mean-factor)) shows the mean recorded value for these factors at each sampling location and (Table\@ref(tab:UserP-dominant-factor)) shows the most commonly selected factors reducing an observer’s desire to participate in 1° and 2° contact recreation. Other factors described by observers were: 1) Low Dissolved Oxygen; 2) Proximity to Road; 3) Proximity to a State Superfund Site; 4) Proximity to WWTF effluent discharge.
+Additional recreational usability questions rank in-stream and stream-side factors on a scale of 0-10 (0 – Best/Natural; 10 Worst/Severe). Those factors are: 1) Water Clarity, 2) Trash, 3) Periphyton, 4) Odor, and 5) Discharge Pipes. These visual and olfactory observations help isolate negative factors influencing the user’s perception of recreational use. Table \@ref(tab:UserP-mean-factor) shows the mean recorded value for these factors at each sampling location and Table \@ref(tab:UserP-dominant-factor) lists the users selection of the most dominant impediment that reduces the observer’s desire to participate in 1° and 2° contact recreation, which can include the factors above, as well as ease of access and proximity to development.
 
-```{r tab.id="UserP-mean-factor", tab.cap="Mean observer ranked value for factors influencing desire to participate in 1° and 2° contact recreation. Factors were ranked on a 10 scale (0 – Best/Natural; 10 Worst/Severe) according to perceived impact on a location. Ranking of recreation ability was performed for all locations during each site visit", echo=FALSE, message=FALSE, warning=FALSE}
-final_table<-flextable(Variables)%>%
-  set_header_labels(Sites="Site \n ID",`Water Clarity`="Water \n Clarity", `Suspended Phytoplankton`="Suspended \nPhytoplankton", Periphyton="Periphyton", Odor="Odor", Trash="Trash", `Discharge Pipes`= "Dishcarge \n Pipes")%>%
-  align(j=2:8, align="center", part="all")%>%
-  font(fontname = "Arial", part="all")%>%
-  fontsize(size=10, part="all")%>%
-  fontsize(size=8,j=2) %>% 
-  width(j = c(2,4,8), width = 0.8)%>%
-  width(j = c(3,5), width = 1.1)%>%
-  width(j=1, width=1.1) %>% 
-  merge_v(j=1) %>% 
-  theme_zebra() %>% 
-  #autofit() %>% 
-  #fit_to_width(max_width = 7.5) %>% 
+```{r tab.id="UserP-mean-factor", tab.cap="Mean observer ranked value for factors influencing desire to participate in 1° and 2° contact recreation. Factors were ranked on a 10 scale (0 – Best/Natural; 10 Worst/Severe) according to perceived impact on a location. Ranking of recreational ability was performed for all locations during each site visit", echo=FALSE, message=FALSE, warning=FALSE}
+final_table<-table.f(Variables,2,2)
+
+final_table<-final_table %>% 
 flextable::bg(j=1,part = "body",bg = "white") %>% 
   flextable::border(part = "body",border.bottom = officer::fp_border(color="grey")) %>% 
   flextable::border(part = "body",j=1,border.right = officer::fp_border(color = "grey"))
@@ -71,21 +62,15 @@ final_table
 \newpage
 
 
-
 ```{r tab.id="UserP-dominant-factor", tab.cap="Most frequently ranked factor influencing observer desire to participate in 1° and 2° contact recreation. Factors influencing desire to recreate were ranked and a primary factor influencing the desire to participate in 1° and 2° contact recreation was chosen during each site visit. Column values represent the factor selected most frequently at each site.", message = F, warning = F, echo= F}
-final_table2<-flextable(Dominant)%>%
-  theme_zebra()%>%
-  align(j=1:3, align="left", part="all")%>%
-  fontsize(size = 10, part = "body")%>%
-  fontsize(size=8,j=2) %>% 
-  font(fontname = "Arial", part="all") %>% 
-  autofit() %>% 
-  fit_to_width(max_width = 7.5) %>% 
+final_table2<-table.f(Dominant,2,2) 
+
+final_table2<-final_table2 %>% 
   flextable::merge_v(j=1) %>% 
   flextable::bg(j=1,part = "body",bg = "white") %>% 
   flextable::border(part = "body",border.bottom = officer::fp_border(color="grey")) %>% 
-  flextable::border(part = "body",j=1,border.right = officer::fp_border(color = "grey"))
-  
+  flextable::border(part = "body",j=1,border.right = officer::fp_border(color = "grey")) %>% 
+flextable::border(part = "body",j=1,border.left = officer::fp_border(color = "grey"))
 
 final_table2
 ```

@@ -37,6 +37,8 @@ habitat.short<-habitat.short %>%
 
 habitat.short$SITE_PWL_ID<-factor(habitat.short$SITE_PWL_ID, ordered = TRUE)
 
+habitat.short[4:16] <- sapply(habitat.short[4:16],as.numeric)
+
 #average all aspects by site
 habitat.df<-habitat.short%>%
   group_by(HFDH_EVENT_SMAS_HISTORY_ID, HFDH_GRADIENT)%>%

@@ -8,7 +8,7 @@
 #TSR is the vibrio stuff, the TWR stuff is the ceriodaphnia 
 
 tox.df<-tox.sed.short %>% 
-  select(TSR_EVENT_SMAS_HISTORY_ID,TSR_EVENT_SMAS_SAMPLE_DATE,TSR_SEDIMENT_ASMT,
+  select(EVENT_SMAS_ID,TSR_EVENT_SMAS_SAMPLE_DATE,TSR_SEDIMENT_ASMT,
          TSR_SEDIMENT_ASMT,TSR_POREWATER_ASMT,TSR_POREWATER_RSLT,TSR_SEDIMENT_RSLT)
 
 #make year column and  limit to what you want
@@ -22,7 +22,7 @@ tox.df<-tox.df %>%
 sites.short<-sites %>% 
   select(SITE_HISTORY_ID,group,order,SITE_WATER_QLTY_STANDARD,SITE_PWL_ID)
 
-tox.df<-merge(tox.df,sites.short,by.x="TSR_EVENT_SMAS_HISTORY_ID",by.y="SITE_HISTORY_ID")
+tox.df<-merge(tox.df,sites.short,by.x="EVENT_SMAS_ID",by.y="SITE_HISTORY_ID")
 
 #select the columns to keep
 tox.df<-tox.df %>% 
@@ -31,7 +31,7 @@ tox.df<-tox.df %>%
 
 
 tox.tbl<-tox.df %>% 
-  rename("Station ID"=TSR_EVENT_SMAS_HISTORY_ID,
+  rename("Station ID"=EVENT_SMAS_ID,
          "Sample Date"=TSR_EVENT_SMAS_SAMPLE_DATE,
          "Sediment \n Assessment"=TSR_SEDIMENT_ASMT,
          "Porewater \n Assessment"=TSR_POREWATER_ASMT,

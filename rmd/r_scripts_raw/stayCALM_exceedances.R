@@ -12,9 +12,18 @@ rm(analyte,habitat.short,metrics.short,
 #first read in the pwl to get the segment id in both files
 pwl<-sites.short %>% 
   select(SITE_HISTORY_ID,SITE_PWL_ID)
+#add the FL ones
+ext.pwl<-ext %>% 
+  select()
 
 #merge with chem and insitu to get the pwl id into those files
 chem.short<-merge(chem.short,pwl, by.x="CHS_EVENT_SMAS_HISTORY_ID",by.y="SITE_HISTORY_ID")
+
+
+#make the results have 1/2 the MDL for analysis
+chem.short<-chem.short %>% 
+  mutate(CHR_RESULT_VALUE=case_when(CHR_VALIDATOR_QUAL=="U"~as.numeric(CHR_METHOD_DETECT_LIMIT*0.5),
+         TRUE~as.numeric(CHR_RESULT_VALUE)))
 
 in.situ.short<-merge(in.situ.short,pwl, by.x="ISWC_EVENT_SMAS_HISTORY_ID",by.y="SITE_HISTORY_ID")
 
@@ -96,10 +105,13 @@ param.names<-read.csv(paste(file.path,"/col_names/stayCALM_parameters.csv",sep =
 #fix the DO fraction
 all.chemistry<-all.chemistry %>% 
   mutate(fraction=case_when(parameter=="DISSOLVED OXYGEN"& units=="mg/l"~"dissolved",
+                            parameter=="PH" & units=="ph units"~"total",
                             TRUE~paste(fraction)))
 
+
 param.names.short<-param.names %>% 
-  select(CHEM_PARAMETER_NAME,stayCALM_parameter,stayCALM_units,stayCALM_fraction)
+  select(CHEM_PARAMETER_NAME,stayCALM_parameter,stayCALM_units,stayCALM_fraction) %>% 
+  distinct()
 
 all.chemistry<-merge(all.chemistry,param.names.short,
                      by.x=c("parameter","fraction","units"),
@@ -182,7 +194,6 @@ chem_extract.df<-chem_extract.df %>%
 
 chem_extract.df$value<-as.numeric(chem_extract.df$value)
 
-
 #correct them based on the units in the stds, and convert corrected value column to numeric
 chem_extract.df$corrected_value<-ifelse(chem_extract.df$units=="mg/l" & chem_extract.df$units_threshold=="ug/l",
                                         chem_extract.df$value*1000,paste(chem_extract.df$value))
@@ -190,8 +201,20 @@ chem_extract.df$corrected_value<-ifelse(is.na(chem_extract.df$corrected_value),
                                         chem_extract.df$value,chem_extract.df$corrected_value)
 chem_extract.df$corrected_value<-as.numeric(chem_extract.df$corrected_value)
 
+chem_extract.df_2<-chem_extract.df %>% 
+  rename(units_parameter=units,
+         units=units_threshold)
 
 #have to have it merge by units_threshold to get the match
+chem_export <- merge(x = chem_extract.df_2, 
+                 y = wqs_wipwl.df,
+                 by = c("seg_id", "parameter",
+                        "fraction","units"),
+                 all.x = TRUE)
+chem_export_thresh<-thresh_determination(chem_export)
+
+#chem_export$units<-NULL
+
 chem_extract.df$value<-NULL
 chem_extract.df$units<-NULL
 chem_extract.df<-chem_extract.df %>% 
@@ -202,12 +225,6 @@ chem.df <- merge(x = chem_extract.df,
                  y = wqs_wipwl.df,
                  by = c("seg_id", "parameter",
                         "fraction", "units"))
-
-chem_export <- merge(x = chem_extract.df, 
-                 y = wqs_wipwl.df,
-                 by = c("seg_id", "parameter",
-                        "fraction", "units"),
-                 all.x = TRUE)
 
 chem.df <- thresh_determination(chem.df)
 

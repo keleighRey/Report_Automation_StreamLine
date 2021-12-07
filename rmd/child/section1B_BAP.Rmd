@@ -5,28 +5,9 @@ date: "4/10/2020"
 output:
   word_document: default
 ---
-Benthic macroinvertebrate communities were sampled to evaluate water quality impacts to the aquatic life use. Where appropriate riffle habitat was present, collection of macroinvertebrates was preformed using the kick method described in section 9.4 of SOP #208-19 Biological Monitoring of Surface Waters in New York State. With the exception of PEERS sites, replicate (n=4/site) macroinvertebrate samples were collected once at each site during years water chemistries were collected. For traveling kick samples, the contents of replicates for each site were field-inspected to determine major groups of organisms present, and then preserved in alcohol for lab inspection and identification of 100-specimen subsamples. For non-wadable sites, multiplates were deployed for a five-week colonization period, scraped, contents preserved and processed to a minimum of 250 organisms and a quarter of the sample. If target counts were not met, samples were processed in their entirety. Specimens were identified to lowest possible taxonomic resolution, typically genus or species. 
+Biological assessments based on the macroinvertebrate community provide the ability to detect water quality problems that are intermittent, not detected, and/or underestimated by water chemistry sampling alone. These biological assessments of water quality are generated using calculated Biological Assessment Profile (BAP) scores (SOP #208-21). BAP scores are calculated by taking the average of five normalized 10-scale community metrics and assigning that score to a four-tiered system of impact category of non (7.5-10), slight (5.0-7.5), moderate (2.5-5.0), or severe (0-2.5) impacts see (Figure \@ref(fig:BAPfig); SOP #208-21). A final BAP score below 5 is associated with significant loss of biodiversity, functional organization, and ability to support a balanced community compared to natural conditions (Karr, 1991; Davis, 1995). A BAP score above 5 indicates that aquatic life in the sampled stream reflects that of natural conditions or only slightly altered from natural (Figure \@ref(fig:BAP)). Expected variability in the results of benthic macroinvertebrate community samples is presented in Smith and Bode (2004).
 
-Biological assessments of water quality are generated from Biological Assessment Profile (BAP) scores (SOP #208-19). BAP scores are calculated by taking the average of five normalized 10-scale community metrics and assigning that score to a four-tiered system of impact category of non (7.5-10), slight (5.0-7.5), moderate (2.5-5.0), or severe (0-2.5) impacts see (Figure\@ref(fig:BAP)). A final BAP score below 5 suggests that the sampled stream is not achieving its aquatic life use goals (SOP #208-19). A BAP score above 5 indicates that the sampled stream is attaining its aquatic life use goals (Figure 10; SOP #208-19). Expected variability in the results of benthic macroinvertebrate community samples is presented in Smith and Bode (2004).
-
-![Biological Assessment Profile (BAP) score impact categories based on the macroinvertebrate community. Scores below 5 suggest impairment to aquatic life and scores above 5 indicate attainment of aquatic life of use. ](bap.jpg)
-
-
-```{r BAP, fig.width=7,fig.height=7, message=FALSE, warning=FALSE, echo=FALSE, fig.cap="Biological Assessment Profile (BAP) Scores and 95% confidence intervals for benthic macroinvertebrate community assessment data for the Survey, 2019. Symbology corresponds with WI/PWL segmentation as indicated in the plot legend."}
-
- if(grouping_for_bap=="site"){bap.graph(sum.metrics)}
-
-if(grouping_for_bap=="PWL"){bap.graph.pwl(sum.metrics2)}
-
-if(grouping_for_bap=="both"){bap.graph(sum.metrics)}
- 
-
-
-
-```
-
-```{r BAP2, fig.width=7,fig.height=7, message=FALSE, warning=FALSE, echo=FALSE, fig.cap="Biological Assessment Profile (BAP) Scores and 95% confidence intervals for benthic macroinvertebrate community assessment data for the Survey, by PWL. Symbology corresponds with WI/PWL segmentation as indicated in the plot legend."}
-
+```{r text,echo=FALSE, message=FALSE, warning=FALSE}
 
 #bap.graph.pwl(sum.metrics2)
 show.text<-if(nrow(bap5) == 0){
@@ -36,16 +17,54 @@ show.text<-if(nrow(bap5) == 0){
 }
 
 show.text2<-if(nrow(bap.inc)==0){
-  paste("None of the segments had a mean BAP score that would suggest inconclusive results.")
+  paste("None of the segments had a mean BAP score that would suggest inconclusive results")
 }else{
-  paste("However ninety-five percent confidence intervals suggest inconclusive results for segments",unique(bap.inc$SITE_PWL_ID),sep = ",")
+  paste("Also ninety-five percent confidence intervals suggest inconclusive results for segments",unique(bap.inc$SITE_PWL_ID),sep = ",")
 }
 
-if(grouping_for_bap=="both"){bap.graph.pwl(sum.metrics2)}
+#set the group colors
+##set group colors
+sites<-sites %>% 
+  arrange(order)
+
+#sites$group<-levels(with(sites,reorder(group,order)))
+
+groups<-unique(sites$group)
+
+group_colors <- setNames(RColorBrewer::brewer.pal(length(unique(sites$group)), "Set1"), levels(sites$group))
+
+names(group_colors)<-c(groups)
+
+
+```
+ `r paste(show.text)` (Figure \@ref(fig:BAP)). `r paste(show.text2)`.
+
+```{r BAPfig,fig.width=5,fig.height=7,fig.cap="Biological Assessment Profile (BAP) score impact categories based on the macroinvertebrate community.", echo=FALSE, message=FALSE, warning=FALSE}
+
+knitr::include_graphics(here::here("rmd/bap.jpg"))
 
 ```
 
-On average, Biological Assessment Profile (BAP) scores ranged from slightly to moderately impacted across all sites on the WI/PWL segments in the watershed (SOP #208-19). `r paste(show.text)` (Figure\@ref(fig:BAP)). `r paste(show.text2)`.
+
+```{r BAP, fig.width=7,fig.height=7, message=FALSE, warning=FALSE, echo=FALSE, fig.cap="Biological Assessment Profile (BAP) Scores and 95% confidence intervals for benthic macroinvertebrate community assessment data. Symbology corresponds with WI/PWL segmentation as indicated in the plot legend."}
+
+ if(grouping_for_bap=="site"&nrow(sum.metrics)>1){
+   bap.graph(sum.metrics)}
+
+if(grouping_for_bap=="PWL"&nrow(sum.metrics2)>1){bap.graph.pwl(sum.metrics2)}
+
+if(grouping_for_bap=="both"& nrow(sum.metrics)>1){bap.graph(sum.metrics)}
+ 
 
 
-`
+
+```
+
+```{r BAP2, fig.width=7,fig.height=7, message=FALSE, warning=FALSE, echo=FALSE, fig.cap="Biological Assessment Profile (BAP) Scores and 95% confidence intervals for benthic macroinvertebrate community assessment data. Symbology corresponds with segmentation as indicated in the plot legend."}
+
+
+if(grouping_for_bap=="both"& nrow(sum.metrics2)>1){bap.graph.pwl(sum.metrics2)}
+
+```
+
+

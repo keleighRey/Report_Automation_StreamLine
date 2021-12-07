@@ -5,26 +5,63 @@ date: "4/10/2020"
 output: 
 word_document: default
 ---
+### Water Chemistry Collection
 
-## Water Chemistry Methodology
-SMAS  
-Methods used for water chemistry data collection are described by NYSDEC standard operating procedures (SOP). The collection of water chemistry samples followed procedures described in SOP #210(17-19) Collection of Water Column Samples for the Rotating Integrated Basin Studies (RIBS) Program. Where the depth of water permitted, water chemistry samples were collected using the depth-integrating suspended sediment sampler – wading (DH-81) method (SOP #210(17-19)), section 11.2). Where the depth of water was too shallow water chemistry samples were collected using the direct grab method (SOP #210(¬17-19), section 11.6). Water samples were processed using a contract lab with NYS Environmental Laboratory Approval Program (ELAP) certification. 
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+#get segments and other text for below
+show_text_pwl<-unique(sites$SITE_PWL_ID)
 
-Stream discharge was measured using the velocity-area method according to Turnipseed and Sauer (2010). The velocity-area method (Midsection Method) calculates discharge by subdividing a stream cross-section into 10 equally spaced stations and measuring depth and velocity within each station and summing the products (Turnipseed and Sauer, 2010). A top-set wading rod and Sontek FlowTracker was used. Methods are described in detail in Turnipseed and Sauer (2010) and Appendix I provides pertinent elements. Appendix II provides the field sheet used in collection of stream depth and velocity for discharge calculations.
+temp7<-temp6
+temp7<-temp7 %>% 
+  mutate(parameter=case_when(parameter=="ph"~"pH",
+                             parameter=="dissolved_oxygen"~"dissolved oxygen",
+                             TRUE~parameter))
+show_text_standards<-unique(temp7$parameter) 
 
-Ambient water chemistry sampling included in situ and lab measured water quality analytes (Table\@ref(tab:Analytes)). Where applicable, chemistry results were analyzed for exceedances of state water quality standards and summarized below using R programing software (R Core Team, 2017). All raw chemistry results (in situ and lab reported) with all applicable standards and exceedance determinations accompany this report as Attachment I.
+```
 
-All survey data were subjected to the quality assurance/quality control (QA/QC) protocols detailed in Appendix VI. For water chemistry, an evaluation of the precision, accuracy, and completeness of processed water chemistry samples after lab analyses were performed following the methods detailed in part A of Appendix V of this report. Appendix VI.B includes a compilation of quality assurance results for each site. Only data meeting the highest data quality standard are reported and used in this report (Appendix VI).
+DEC establishes water quality standards (WQS) and guidance values for many specific substances. Waters are classified for their best uses and WQS are set to protect those uses (6 NYCRR Part 703). The data presented below does not meet the minimum data requirements for a confirmed best use assessment^[Best use assessment confirmation is based on 1) whether data are core or supplemental indicators, 2) how many years of data are available, and 3) how many samples were collected. (CALM, 2021)] (CALM, 2021). For the best use assessment, please see [DEC Info Locator](https://gisservices.dec.ny.gov/gis/dil/) and factsheets^[ Compilation of the state’s Integrated Report and updates to WI/PWL ID factsheets occur during even (2022, 2024) years. Best use assessments and factsheets may not immediately reflect data generated in this report.] for individual WI/PWL ID segments (WI/PWL ID `r paste(unique(show_text_pwl),sep=",")`). 
+
+Ambient water chemistry sampling included in-situ and lab measured water quality analytes (Table \@ref(tab:Analytes)).  A total of `r length(unique(chem.short$CHEM_PARAMETER_NAME))`   lab-measured and `r length(unique(in.situ.short$CHEM_PARAMETER_NAME))` in-situ water quality parameters were collected. Samples were collected by SMAS using the direct grab method (SOP #210-21, section 11.6). Water samples were sent for processing using a contract lab with NYS Environmental Laboratory Approval Program (ELAP) certification. 
+
+Following sample collection, all data processing followed quality assurance/quality control (QA/QC) protocols (SOP #102-20, and #110-21). Only data meeting the highest data quality standard were reported and used in this report. For water chemistry, an evaluation of the precision, accuracy, and completeness of processed water chemistry samples after lab analyses was performed following the methods detailed in SOP #102. Appendix I includes a compilation of all rejected data flagged by the process. Analytes that fell below the minimum detection limit (MDL) were replaced with 1/2 the MDL (Helsel, 1990). Where applicable, raw chemistry results were analyzed for excursions from state WQS and summarized using R programing software (R Core Team, 2017). All accepted raw chemistry results (in-situ and lab reported) with all applicable standards and excursion determinations accompany this report as Attachment I (excel file).
+
+```{r, echo=FALSE,warning=FALSE, message=FALSE}
+if(limit_to_nuts){
+  chem.trans$CHEM_PARAMETER_NAME<-stringr::str_to_title(chem.trans$CHEM_PARAMETER_NAME)
+    chem.trans<-chem.trans %>% 
+      filter(CHEM_PARAMETER_NAME=="Nitrogen, Ammonia (As N)"|
+             CHEM_PARAMETER_NAME=="Nitrogen, Kjeldahl, Total"|
+             CHEM_PARAMETER_NAME=="Nitrogen, Nitrate-Nitrite"|
+             CHEM_PARAMETER_NAME=="Nitrogen, Nitrate (As N)"|
+             CHEM_PARAMETER_NAME=="Nitrogen, Nitrite"|
+             CHEM_PARAMETER_NAME=="Nitrogen, Total"|
+             CHEM_PARAMETER_NAME=="Phosphorus, Total (As P)")
+   
+      in.situ.short$CHEM_PARAMETER_NAME<-stringr::str_to_title(in.situ.short$CHEM_PARAMETER_NAME)
+      in.situ.short<-in.situ.short %>% 
+      filter(CHEM_PARAMETER_NAME=="Dissolved Oxygen"|
+               CHEM_PARAMETER_NAME=="Temperature"|
+               CHEM_PARAMETER_NAME=="Ph"|
+               CHEM_PARAMETER_NAME=="Specific Conductance")
+    }
+```
+
+A total of `r n_distinct(chem.short$CHEM_PARAMETER_NAME)` lab-measured, and `r n_distinct(in.situ.short$CHEM_PARAMETER_NAME)` in-situ water quality analytes were analyzed in this study. Out of the `r nrow(chem.short)` lab-measured records and `r nrow(in.situ.short)` in-situ water quality records, there were `r nrow(temp5)` excursions from established water quality standards (6 NYCRR Part 703). `r if(nrow(temp5 >1)){paste("There were excursions in",(unique(stars$Parameter)),".",sep=": ")}`
+
+`r if(grouping_for_chem=="PWL"){paste("Plots illustrating the range of analyte concentration values within each WI/PWL segments from both mainstem and tributaries, are included below.")}`
+`r if(grouping_for_chem=="site"){paste("Plots illustrating the range of analyte concentration values for each site are included below.")}` `r if(limit_to_nuts){paste("Analytes selected for presentation were subset to those of specific interest to the study and include nitrate, nitrate + nitrite (as N), nitrite (as N), total nitrogen, ammonia, total kjeldahl nitrogen (TKN), total phosphorus, and turbidity, and in-situ parameters: dissolved oxygen, temperature, pH, and specific conductance.")}` 
+`r if(nrow(temp5>0)){paste("Excursions are indicated by an asterisk. Site specific excursions are quantified in Section II.")}`
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 #source(here::here(),
      #  "r_scripts_raw",
-    #   "stayCALM_exceedances.R")
+    #   "stayCALM_violations.R")
 
 ```
 
 <!---BLOCK_LANDSCAPE_START--->
-```{r tab.id= "Analytes", tab.cap="Water chemistry analytes sampled as part of the Stream Assessment Survey. Table lists sampled analytes and analytical specifications. ^ Precision objectives are defined by results of duplicate samples as described in Appendix V", echo=FALSE, message=FALSE, warning=FALSE}
+```{r tab.id= "Analytes", tab.cap="Water chemistry analytes sampled as part of the Stream Assessment Survey. Table lists sampled analytes and analytical specifications.", echo=FALSE, message=FALSE, warning=FALSE}
 
 library(dplyr)
 library(flextable)
@@ -38,13 +75,11 @@ tl.1<-align(tl.1, i = NULL, j =(2:10) , align = "center", part = "all")%>%
   width(j=c(6:10), width = 0.8)%>%
   width(j=3:5, width=0.6)%>%
   width(j=1, width=1.2)
+tl.1<-flextable::footnote(tl.1,ref_symbols =c("",""),part="header",value = as_paragraph(c("^ Precision objectives are defined by results of duplicate samples as described in SOP #102-20, and #110-21.","~ Not Applicable")))
 tl.1
 
 ```
 <!---BLOCK_LANDSCAPE_STOP--->
-\newpage
-## Water Chemistry
-
 
 ```{r include=FALSE,message=FALSE,warning=FALSE}
 
@@ -58,9 +93,15 @@ library(dplyr)
 library(forcats)
 
 #set group colors
-groups<-unique(sites$group)
+sites<-sites %>% 
+  arrange(order)
 
-group_colors <- setNames(RColorBrewer::brewer.pal(length(levels(sites$group)), "Set1"), levels(sites$group))
+#sites$group<-levels(with(sites,reorder(group,order)))
+sites$group<-forcats::fct_reorder(sites$group,sites$order)
+  
+groups<-as.character(unique(sites$group))
+
+group_colors <- setNames(RColorBrewer::brewer.pal(length(unique(sites$group)), "Set1"), levels(sites$group))
 
 names(group_colors)<-c(groups)
 
@@ -69,23 +110,29 @@ names(group_colors)<-c(groups)
 ```
 
 
-```{r chemgraph1, echo=FALSE, fig.width=7.5, fig.height=6, message=FALSE, warning=FALSE, fig.cap=paste(unique(chem.trans$CHEM_PARAMETER_NAME), ", " , "The X-axis presents WI/PWL ID of the sampling locations from upstream to downstream and axis labels correspond with Table 1, Figure 1 and Figure 2. Color of the box represents the location of the WI/WPL in the watershed as indicated in the plot legend. Horizontal lines represent the 95th, 75th, and 25th percentiles of statewide data for each endpoint.", sep="")}
+```{r chemgraph1, echo=FALSE, fig.width=7.5, fig.height=6, message=FALSE, warning=FALSE, fig.cap=paste(unique(chem.trans$CHEM_PARAMETER_NAME), ", " , label, sep="")}
+  
 
 if(nrow(chem.trans)>1 & grouping_for_chem=="site"){
+     label="Stars at the bottom of the graph indicate an excursion of a WQS (if applicable). Axis are presented in log scale for comparison by site." 
+
   chem.graph.site(chem.trans)
+    
 }
 
 if(nrow(chem.trans)>1 & grouping_for_chem=="PWL"){
+  label="Boxes represent the interquartile range (25th to 75th percentiles) of the data for each site, whiskers represent the IQR +/- 1.5 times the IQR and dots indicate potential outlier values, or those outside of the IQR +/- 1.5 times the IQR. Stars at the bottom of the graph indicate an excursion of a WQS (if applicable). Axis are presented in log scale for comparison by site." 
   chem.graph.pwl(chem.trans)
+  
 }
 
 
 ```
 
 
-```{r turb, echo=FALSE, fig.width=7.5, fig.height=6, message=FALSE, warning=FALSE, fig.cap=paste(unique(chem.no.trans$CHEM_PARAMETER_NAME), ", " , "The X-axis presents WI/PWL ID of the sampling locations from upstream to downstream and axis labels correspond with Table 1, Figure 1 and Figure 2. Color of the box represents the location of the WI/WPL in the watershed as indicated in the plot legend. Horizontal lines represent the 95th, 75th, and 25th percentiles of statewide data for each endpoint.", sep="")}
+```{r turb, echo=FALSE, fig.width=7.5, fig.height=6, message=FALSE, warning=FALSE, fig.cap=paste(unique(chem.no.trans$CHEM_PARAMETER_NAME), ", " , label, sep="")}
 
-#this one for the other values (no transformation of units-In-SITU data)
+#this one for the other values (no transformation of units-in situ data)
  
 if (nrow(chem.no.trans)>0 & grouping_for_chem=="site"){
   chem.graph.continuous.site(chem.no.trans)
@@ -99,9 +146,9 @@ if (nrow(chem.no.trans)>0 & grouping_for_chem=="PWL"){
 
 
 
-```{r insituChem, echo=FALSE, fig.width=7.5, fig.height=6, message=FALSE, warning=FALSE, fig.cap=paste(unique(in.situ.short$CHEM_PARAMETER_NAME), ", " , "The X-axis presents WI/PWL ID of the sampling locations from upstream to downstream and axis labels correspond with Table 1, Figure 1 and Figure 2. Color of the box represents the location of the WI/WPL in the watershed as indicated in the plot legend. Horizontal lines represent the 95th, 75th, and 25th percentiles of statewide data for each endpoint. The total number of reported values illustrated for each sampling location can vary due to non-detection and QA/QC procedures. Descriptions of removed records are presented in Appendix V.", sep="")}
+```{r insituChem, echo=FALSE, fig.width=7.5, fig.height=6, message=FALSE, warning=FALSE, fig.cap=paste(unique(in.situ.short$CHEM_PARAMETER_NAME), ", " , label, sep="")}
 
-#this one for the other values (no transformation of units-In-SITU data)
+#this one for the other values (no transformation of units-in situ data)
  
 if (nrow(in.situ.short)>0 & grouping_for_chem=="site"){
   chem.graph.insitu.site(in.situ.short)

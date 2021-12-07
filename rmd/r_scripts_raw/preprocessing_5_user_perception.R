@@ -37,15 +37,16 @@ contact<-merge(contact,pwl,by.x="Site",by.y="SITE_HISTORY_ID")
 contact<-contact %>% 
   rename(PWL=SITE_PWL_ID)
 
+
 Variables<-userp.short%>%
   group_by(UPFDH_EVENT_SMAS_HISTORY_ID)%>%
-  summarize(`Water Clarity`=round(mean(UPFDH_WATER_CLARITY, na.rm = TRUE), digits=0),
-            `Susp. Phyto.`= round(mean(UPFDH_SUSPENDED_PHYTOPLANKTON, na.rm = TRUE),digits=0),
-            Periphyton= round(mean(UPFDH_PERIPHYTON, na.rm = TRUE), digits=0),
-            Macro.= round(mean(UPFDH_MACROPHYTE, na.rm = TRUE), digits=0),
-            Odor=round(mean(UPFDH_ODOR, na.rm=TRUE), digits=0),
-            Trash= round(mean(UPFDH_TRASH, na.rm = TRUE), digits=0),
-            `Discharge Pipes`= round(mean(UPFDH_DISCHARGE_PIPE, na.rm = TRUE), digits=0))
+  summarize(`Water Clarity`=round(mean(as.numeric(UPFDH_WATER_CLARITY), na.rm = TRUE), digits=0),
+            `Susp. Phyto.`= round(mean(as.numeric(UPFDH_SUSPENDED_PHYTOPLANKTON), na.rm = TRUE),digits=0),
+            Periphyton= round(mean(as.numeric(UPFDH_PERIPHYTON), na.rm = TRUE), digits=0),
+            Macro.= round(mean(as.numeric(UPFDH_MACROPHYTE), na.rm = TRUE), digits=0),
+            Odor=round(mean(as.numeric(UPFDH_ODOR), na.rm=TRUE), digits=0),
+            Trash= round(mean(as.numeric(UPFDH_TRASH), na.rm = TRUE), digits=0),
+            `Discharge Pipes`= round(mean(as.numeric(UPFDH_DISCHARGE_PIPE), na.rm = TRUE), digits=0))
 
 Variables<-Variables %>% 
   rename(Site=UPFDH_EVENT_SMAS_HISTORY_ID)
@@ -94,6 +95,8 @@ Dominant<-Dominant %>%
   relocate(PWL,.before=Sites)
 Dominant$group<-NULL
 Dominant$order<-NULL
+Dominant$Primary<-gsub("_"," ",Dominant$Primary)
+Dominant$Primary<-stringr::str_to_sentence(Dominant$Primary,locale="en")
 
 #Dominant<-order_sites(Dominant,sites_table=sites, sites_site_col = "SITE_HISTORY_ID", df_site_col = "UPFDH_EVENT_SMAS_HISTORY_ID")
 

@@ -1,0 +1,227 @@
+---
+title: "Section 2: Site Specific Data"
+author: 'NYSDEC SMAS : Keleigh Reynolds'
+date: "`r Sys.Date()`"
+output: 
+word_document: default
+
+---
+Section II provides a tabular summary of all accepted results from each sampling location. Descriptive tables for each site include applicable established WQS (6 NYCRR Part 703), a summary of general chemistry and in-situ results, WQS excursion information, and BAP scores. Water chemistry results are summarized by analyte concentration after meeting QA/QC standards. WQS excursion information identifies excursions of the applicable WQS. BAP score information includes mean BAP score, standard deviation, standard error, and number of replicates. 
+
+```{r include=FALSE,message=FALSE,warning=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+
+#library(stringr)
+#library(dplyr)
+
+#source(here::here("rmd/r_scripts_raw/preprocessing_7_sect_2.R"))
+
+#disable the scientific notation 
+#options(scipen=99)
+
+
+
+```
+
+```{r tab.id="sites_chem",results = 'asis',warning=FALSE, echo=FALSE,message=FALSE}
+
+sites<-sites.short %>% 
+  arrange(order)
+sites$order<-as.numeric(sites$order)
+#sites$SITE_HISTORY_ID<-fct_reorder(sites$SITE_HISTORY_ID,sites$order)
+
+sites.l<-unique(sites$SITE_HISTORY_ID)
+#add the sites for the FL
+#sites.add<-unique(ext$CHS_EVENT_SMAS_HISTORY_ID)
+#sites.l<-merge(sites.add,sites.l)
+
+ for (i in seq_along(sites.l)) { 
+    #print(i)
+  pwl_sc<-chem_export %>%
+    select(`PWL segment`,Class,Site) %>% 
+    distinct()#use the stayCALM seg ID to limit to class, might need to update, this is only looking at those that went through stayCALM
+  
+  site.loc.small<-pwl_sc[pwl_sc$Site %in% sites.l[i],]
+   
+  stds_small<-unique(site.loc.small$Class)
+  stds_small<-toupper(stds_small)
+  site<-unique(site.loc.small$Site)
+  
+  pwl_small<-unique(site.loc.small$`PWL segment`)
+  site.loc.small<-sites[sites$SITE_HISTORY_ID %in% sites.l[i],]
+   
+   
+   cat("  \n\n###  ",paste(sites.l[i]), "| Waterbody Class:",stds_small,"| WI/PWL ID:",pwl_small)
+   cat("  \n")
+   cat("<br><br>")
+
+
+   #map.me(sites,site.loc.small)
+   
+  temp.stds<-wqs_table %>% 
+    filter(Class==stds_small) %>% 
+    distinct()
+  
+  list.params<-raw_df_export[raw_df_export$site_id %in% sites.l[i],]
+  list.params$parameter<-stringr::str_to_title(list.params$parameter)
+  
+  list.params.l<-unique(list.params$parameter)
+  
+  temp.stds<-temp.stds %>% 
+    subset(Parameter %in% list.params.l)
+  temp.stds<-temp.stds %>% 
+    mutate(Parameter=case_when(Parameter=="Ph"~"pH",
+                               Parameter=="Dissolved_oxygen"~"Dissolved Oxygen",
+                               Parameter=="Nitrate_nitrite"~"Nitrate-nitrite",
+                               TRUE~paste(Parameter)))
+  
+  label=paste("Applicable Standards:",sites.l[i])
+  tab.cap=paste(label)
+  tab<-table.f(temp.stds,2,max(ncol(temp.stds)))
+  #label=paste("Applicable Standards:",sites.l[i])
+  tab<-flextable::set_caption(tab,tab.cap,style="Table Caption",autonum = run_autonum(seq_id = "tab"))
+ # tab<-tab %>% 
+    #flextable::width(j=NULL,3)
+  flextable::fit_to_width(tab,max_width = 3) 
+  flextable::autofit(tab)
+  flextable::docx_value(tab)
+  
+  rm(temp)
+  rm(tab.label)
+   cat("  \n")
+   cat("<br><br>")
+  
+  temp <-chemistry_section2[chemistry_section2$Site %in% sites.l[i], ]
+  temp$Site<-NULL
+  temp$Parameter<-stringr::str_to_title(temp$Parameter)
+
+  
+  if(max(temp$`Record Count`)<= 1){
+    temp<-temp %>% 
+      select(-c(Median,Max,Min)) %>% 
+      rename(Result=Mean)
+  }
+  
+ if (nrow(temp) > 0){ 
+   label=paste("Chemistry Measurements:",sites.l[i])
+   tab.cap=paste(label)
+   tab1<-table.f(temp, 2,max(ncol(temp)))
+  #label=paste("Chemistry Measurements:",sites.l[i])
+  tab1<-flextable::set_caption(tab1,tab.cap,style="Table Caption",autonum = run_autonum(seq_id = "tab"))
+  flextable::fit_to_width(tab1,max_width = 3) 
+  flextable::docx_value(tab1)
+   rm(temp)
+   cat("  \n")
+   cat("<br><br>")
+ }
+   
+   temp <-field[field$Site %in% sites.l[i], ]
+   temp$Site<-NULL
+   
+     if(max(temp$`Record Count`)<= 1){
+    temp<-temp %>% 
+      select(-c(Median,Max,Min)) %>% 
+      rename(Result=Mean)
+     }
+   
+  temp$Parameter<-stringr::str_to_title(temp$Parameter)
+   temp<-temp %>% 
+    mutate(Parameter=case_when(Parameter=="Ph"~"pH",
+                               TRUE~paste(Parameter)))
+  
+   if (nrow(temp) > 0){ tab1<-table.f(temp, 2,max(ncol(temp)))
+  label=paste("In-Situ Measurements:",sites.l[i])
+  tab.cap=paste(label)
+  tab1<-flextable::set_caption(tab1,tab.cap,style="Table Caption",autonum = run_autonum(seq_id = "tab"))
+  flextable::fit_to_width(tab1,max_width = 3) 
+   flextable::docx_value(tab1)}
+
+   rm(temp)
+   cat("  \n")
+   cat("<br><br>")
+   
+   temp<-viol_small[viol_small$site_id %in% sites.l[i],]
+   temp<-temp %>% 
+     select(!c(site_id,seg_id,statistic,sample_count,sample_count,use))
+   temp<-temp %>% 
+     distinct() #take out the repeats
+ 
+     temp<-temp %>% 
+       rename(Date=date,
+              Parameter=parameter,
+              Result=result,
+              Fraction=fraction,
+              Units=units,
+              Threshold=threshold,
+              Excursion=attaining_wqs)
+      temp<-temp %>% 
+        mutate(Excursion=case_when(Excursion=="no"~"Excursion",
+                                   TRUE~"No Excursion"))
+
+     temp<-temp %>% 
+       filter(Excursion=="Excursion") %>% 
+       select(!Excursion)#filter to just the violations and then remove that column
+     
+     temp$Parameter<-stringr::str_to_title(temp$Parameter)
+     temp<-temp %>% 
+    mutate(Parameter=case_when(Parameter=="Ph"~"pH",
+                               TRUE~paste(Parameter)),
+           Units=case_when(Units=="ph units"~"pH units",
+                           TRUE~paste(Units)))
+  if (nrow(temp) > 0){ 
+     tab3<-table.f(temp,2,4)
+   label=paste("Water Quality Standard Excursions:",sites.l[i])
+   tab.cap=paste(label)
+   tab3<-flextable::set_caption(tab3,tab.cap,style="Table Caption",autonum = run_autonum(seq_id = "tab"))
+   flextable::fit_to_width(tab3,max_width = 3) 
+   flextable::docx_value(tab3)}
+   else{
+       cat("  \n\n *Water Quality Standard Excursions*")
+     cat("  \n\n There were no water quality standard excursions at this site during the sampling period.")
+   }
+   rm(temp)
+     cat(rep("\n"))
+   cat("<br><br>")
+   
+  #temp <-nnc_sum.df[nnc_sum.df$SITE_ID %in% sites.l[i], ]
+  #temp$SITE_ID<-NULL
+   #if (nrow(temp) > 0){tab4<-table.f(temp, 2,4)
+   #label=paste("Numeric Nutrient Criteria:",sites.l[i])
+   #tab4<-flextable::set_caption(tab4,label)
+   #flextable::docx_value(tab4)}
+   #rm(temp)
+   #cat("  \n")
+   #cat("<br><br>")
+  
+  temp<-bap.df[bap.df$MSSIH_EVENT_SMAS_HISTORY_ID %in% sites.l[i], ]
+  temp$MSSIH_EVENT_SMAS_HISTORY_ID<-NULL
+  if (nrow(temp) > 0){
+  tab6<-table.f(temp,1,2)
+  label=paste("Biological Assessment Score (BAP) Summary: ",sites.l[i])
+  tab.cap=paste(label)
+  tab6<-flextable::set_caption(tab6,tab.cap,style="Table Caption",autonum = run_autonum(seq_id = "tab"))
+  flextable::docx_value(tab6)}
+  rm(temp)
+  cat("  \n")
+  cat("<br><br>")
+  
+  temp<-flow[flow$SEIH_EVENT_SMAS_HISTORY_ID%in% sites.l[i], ]
+  if (nrow(temp) > 0) {
+    library(ggplot2)
+    tab5<-ggplot(temp,aes(SEIH_EVENT_SMAS_SAMPLE_DATE,SEIH_TOTAL_DISCH)) +
+      geom_point()+
+        ylab("cfs")+
+      xlab("Discharge measured in cubic feet per second (cfs).")+
+      scale_x_date(date_labels = "%b %Y")
+    print(tab5)
+    rm(temp)
+  }
+
+
+  cat("  \n")
+  
+ }
+
+    # create plot for each PWL in df 
+    
+```

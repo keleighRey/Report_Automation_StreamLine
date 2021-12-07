@@ -12,100 +12,51 @@ intro<-read.csv(here::here("data",intro_file_name),stringsAsFactors = FALSE)
 ```
 `r paste(intro$intro)`
 
-The `r params$study_name` site descriptions (Table\@ref(tab:sites-table)) and locations (Figure\@ref(fig:site-map)) are included below. Measures of water and habitat quality included:  
+The Steam Monitoring and Assessment Section (SMAS) conducted targeted stream monitoring that included:  
 
-1. Water Chemistry and Stream Discharge
-2. Benthic Macroinvertebrate Community
+1. Benthic Macroinvertebrate Community Analysis
+2. Water Quality Measurements
 3. Stream Reach Physical Habitat Characteristics
 4. Observer Ranking of Recreational Ability
 `r if(tox){paste("5. Sediment and Porewater Microtox Analysis")}`
 
-This data report provides water quality information in a format designed to update the WI/PWL and document water quality violations. It has been structured into two primary sections: I) an overview to convey results from the five measures of water quality described above at the watershed and WI/PWL scale, and II) a site-specific data summary to present all major findings for each sampling location. Additional sections include literature cited and appendices covering all references and additional source material.
+This data report includes two sections: I) an overview of the sampling events described above, `r if(grouping_for_chem=="PWL"){paste("with results aggregated by WI/PWL segment,")}`  and II) a site-specific data summary to present all major findings for each site. Additional sections (III, IV) include literature cited and appendices covering all references and additional source material.
+
+The `r params$study_name` site descriptions (Table \@ref(tab:sites-table)) and locations (Figure \@ref(fig:site-map)), and sampling dates (Table \@ref(tab:sites-dates)) are included below. 
 
 ```{r include=FALSE,message=FALSE,warning=FALSE}
-#Table 1
-#renames column in the sites table to match
-library(dplyr)
-
-table1<-sites %>% 
-select(SITE_HISTORY_ID,group,SITE_RIVMILE,SITE_PWL_ID,SITE_WATER_QLTY_STANDARD,SITE_DESC,SITE_LATITUDE,SITE_LONGITUDE,order) %>% 
-  distinct() %>% 
-  arrange(order)
-
-table1<-table1 %>% rename("Location ID"=SITE_HISTORY_ID,
-                          "Group"=group,
-                  "Rivermile"=SITE_RIVMILE,
-                  "WI/PWL"=SITE_PWL_ID,
-                  "Waterbody Classification"=SITE_WATER_QLTY_STANDARD,
-                  "Description"=SITE_DESC,
-                  "Latitude"=SITE_LATITUDE,
-                  "Longitude"=SITE_LONGITUDE)
-
-table1$Description<-toupper(table1$Description)
-
-#remove order column for table disply
-table1$order<-NULL
-
-table1<-table1 %>% 
-  rename("Waterbody \n Classification"=`Waterbody Classification`)
-
 
 ```
 
-```{r tab.id="sites-table",  echo=FALSE, message=FALSE, warning=FALSE, tab.cap="Sampling locations. Locations are ordered from upstream to downstream according to river mile and mainstem confluence"}
+```{r tab.id="sites-table",  echo=FALSE, message=FALSE, warning=FALSE, tab.cap="Sampling locations.",sep="."}
+
 library(flextable)
-tl<-flextable(table1) %>% font(i = NULL, j = NULL, fontname="Arial", part = "all") %>% theme_zebra() %>% autofit()
-tl<-align(tl, i = NULL, j =(2:5) , align = "center", part = "all")%>%
-  fontsize(size=8, part = "all")%>%
-  fontsize(j=6, size=7)%>%
-  width(j=c(1), width=1)%>%
-  width(j=c(5), width=0.8)%>%
-  width(j=c(4,7,8), width=0.6)%>%
-  width(j=c(2), width=0.7)%>%
-  width(j=c(3), width=0.6)%>%
-  width(j=6, width=2.5)
+# tl<-flextable(table1) %>% font(i = NULL, j = NULL, fontname="Arial", part = "all") %>% theme_zebra() %>% autofit()
+# tl<-align(tl, i = NULL, j =(2:5) , align = "center", part = "all")%>%
+#   fontsize(size=8, part = "all")%>%
+#   fontsize(j=6, size=7)%>%
+#   width(j=c(1), width=1)%>%
+#   width(j=c(5), width=0.8)%>%
+#   width(j=c(4,7,8), width=0.6)%>%
+#   width(j=c(2), width=0.7)%>%
+#   width(j=c(3), width=0.6)%>%
+#   width(j=6, width=2.5)
+tl<-table.f(table1,2,max(ncol(table1)))
+# tl<-fit_to_width(tl,7.5)
 tl
 ```
 
   
-```{r site-map, fig.cap="Map of sampling locations. Site names reference the Location ID and River Mile presented in \\@ref(tab:sites-table)", echo=FALSE, message=FALSE, warning=FALSE,fig.width=7,fig.height=8}
-#library(leaflet)
-#map function
-  #bounding box
-library(ggmap)
-library(ggrepel)
-nybox<-make_bbox(sites,lon=SITE_LONGITUDE,lat=SITE_LATITUDE)
- 
-ny.map<-qmap(nybox,zoom=map_zoom, 
-             source = "osm",color="bw")+geom_point(data=sites,aes(x=SITE_LONGITUDE,y=SITE_LATITUDE,label=SITE_HISTORY_ID,color=group),size=4)+ geom_label_repel(data=sites,
-    label= sites$SITE_HISTORY_ID, 
-    aes(x=SITE_LONGITUDE,
-    y=SITE_LATITUDE),box.padding   = 0.35, point.padding = 0.5,
-                  segment.color = 'grey50',size=2)
+```{r site-map, echo=FALSE, fig.cap="Map of sampling locations. Site names reference the Location ID and River Mile.", message=FALSE, warning=FALSE}
 
-
-ny.map<-ny.map+ggsn::scalebar(x.min = min(sites$SITE_LONGITUDE),
-                        x.max = max(sites$SITE_LONGITUDE),
-                        y.min = min(sites$SITE_LATITUDE),
-                        y.max = max(sites$SITE_LATITUDE),
-                        dist = 0.3, dist_unit = "km",
-                        transform = TRUE, model = "WGS84",
-                        location="topright")
-ny.map
-
+knitr::include_graphics(here::here(paste("data/map/",params$map_file,sep = "")))
   
 ```
 
 
+
 ```{r tab.id="sites-dates",  echo=FALSE, message=FALSE, warning=FALSE, tab.cap="Sampling dates and overall parameters for the study period included in this report."}
-
-
 
 table.f(dates_all,2,ncol(dates_all))
 
 ```
-
-
-
-
-

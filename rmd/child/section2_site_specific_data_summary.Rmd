@@ -1,40 +1,47 @@
 ---
-title: "section2_sitespecificData"
+title: "Section II: Site Specific Data"
 author: 'NYSDEC SMAS : Keleigh Reynolds'
-date: "4/24/2020"
+date: "`r Sys.Date()`"
 output:
-  word_document: default
+  officedown::rdocx_document:
+    reference_docx: template.docx
 params:
     tox: FALSE
-    study_name: "Halfway Creek Monitoring"
-    year_input: 2010
-    intro_file_name: "halfway_intro.csv"
-    sites_file_name: "halfway_sites.csv"
-    updated_sites_file_name: "halfway_sites_to_assign_order.csv"
-    map_zoom: 12     
+    study_name: "Birch Creek at Belleayre Mountain Ski Area"
+    year_input: 2019
+    intro_file_name: "birch_intro.csv"
+    sites_file_name: "birch_sites.csv"
+    grouping_for_chem: site
+    grouping_for_bap: site
+    map_zoom: 12
+    user: kareynol
+    limit_to_nuts: TRUE
+    data_package: TRUE
 ---
-Section II provides a summary of results from each sampling location. Data provided includes waterbody class and WI/PWL number along with a summary of general chemistry, in situ chemistry results, BAP scores and instantaneous discharge. Water chemistry results are summarized by number of records reported after quality assurance (Appendix V), exceedances of water quality standards and a statistical summary that includes mean, median, minimum, and maximum concentrations. Specific exceedances of water quality standards are also specified. Complete, quality assured raw chemistry data results accompanied by all applicable standards are available in electronic form (attached). BAP scores are provided and include a statistical summary of results for each site that includes mean, impairment threshold, minimum, maximum, standard deviation and standard error. Instantaneous stream discharge (cubic feet/second) is reported for dates when conditions allowed safe, wadeable access to streams (RAS QAPP (17-19); SOP #210-19).
+Section II provides a summary of results from each sampling location. Descriptive tables include applicable established water quality standards (6 NYCRR Part 703), as well as narrative standards. Nutrients are regulated by a narrative water quality standard stating: “None in amounts that result in growths of algae, weeds, and slimes that will impair the waters for their best usages” (6 NYCRR 703.2).
+
+Data tables include a summary of general chemistry, in situ chemistry results, BAP scores and instantaneous discharge (where available). Water chemistry results are summarized by number of records reported after meeting quality assurance standards, and a statistical summary that includes mean, median, standard deviation (SD), minimum, and maximum concentrations. Violations of water quality standards at each site are also included. Complete, quality assured raw chemistry data results accompanied by all applicable standards are available in Attachment I (excel file). BAP scores are provided and include date of the sample,mean BAP score, standard deviation (SD), standard error (SE) and number of records. Instantaneous stream discharge (cubic feet/second) is reported for dates when conditions allowed safe, wadeable access to streams (RAS QAPP (17-19); SOP #210-21).
 
 ```{r setup, include=FALSE,message=FALSE,warning=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-
-library(stringr)
-library(dplyr)
+knitr::opts_chunk$set(echo = FALSE)
 
 study_name=params$study_name
 tox=params$tox
 intro_file_name=params$intro_file_name
 sites_file_name=params$sites_file_name
 year.input=params$year_input
-updated_sites_file_name=params$updated_sites_file_name
-year_input=params$year_input
+#updated_sites_file_name=params$updated_sites_file_name
+grouping_for_bap=params$grouping_for_bap
+grouping_for_chem=params$grouping_for_chem
 map_zoom=params$map_zoom
+user=params$user
+limit_to_nuts=params$limit_to_nuts
+data_package=params$data_package
 
+library(stringr)
+library(dplyr)
 
 source(here::here("rmd/r_scripts_raw/preprocessing_7_sect_2.R"))
-
-#disable the scientific notation 
-options(scipen=9999)
 
 ```
 
@@ -59,11 +66,19 @@ return(tl)
 
 #map function
 map.me<-function(df1,df2){
+  df1$SITE_LONGITUDE<-as.numeric(df1$SITE_LONGITUDE)
+  df1$SITE_LATITUDE<-as.numeric(df1$SITE_LATITUDE)
+  df2$SITE_LATITUDE<-as.numeric(df2$SITE_LATITUDE)
+  df2$SITE_LONGITUDE<-as.numeric(df2$SITE_LONGITUDE)
   #bounding box
 library(ggmap)
-nybox<-make_bbox(df1,lon=SITE_LONGITUDE,lat=SITE_LATITUDE)
- 
-ny.map<-qmap(nybox, source = "osm",color="bw",zoom=map_zoom)+
+dodge_map<-read.csv(here::here("data/dodge_map.csv"),stringsAsFactors = FALSE)
+  
+#nybox<-make_bbox(df1,lon=SITE_LONGITUDE,lat=SITE_LATITUDE)
+nybox<-make_bbox(dodge_map,lon=SITE_LONGITUDE,lat=SITE_LATITUDE)
+
+
+ny.map<-qmap(nybox, source = "osm",color="bw", zoom=params$map_zoom)+
   #geom_path(data=subset(mapl,type=="trib"),aes(x = long, y = lat,group=group),color="steelblue1",alpha=0.5,,na.rm=TRUE)+
   #geom_path(data=subset(mapl,type=="main"),aes(x = long, y = lat,group=group),color="slateblue3",size=0.9,,na.rm=TRUE)+
 geom_point(data=df1,aes(x=SITE_LONGITUDE,y=SITE_LATITUDE),
@@ -89,18 +104,17 @@ print(ny.map)
 #x.vec
 ```
 
-```{r,warning=FALSE, echo=FALSE,message=FALSE, results='asis',fig.align="center"}
-
+```{r sites_chem, fig.cap="Map of site locations. Specific site is red, sites in the rest of the study are mapped in yellow.", warning=FALSE, echo=FALSE,message=FALSE, results='asis',fig.align="center"}
 
 sites<-sites %>% 
   arrange(order)
 sites$order<-as.numeric(sites$order)
-sites$SITE_HISTORY_ID<-fct_reorder(sites$SITE_HISTORY_ID,sites$order)
+#sites$SITE_HISTORY_ID<-fct_reorder(sites$SITE_HISTORY_ID,sites$order)
 
 sites.l<-unique(sites$SITE_HISTORY_ID)
 
  for (i in seq_along(sites.l)) { 
-   # print(i)
+    #print(i)
   site.loc.small<-sites[sites$SITE_HISTORY_ID %in% sites.l[i],]
    
   stds_small<-unique(site.loc.small$SITE_WATER_QLTY_STANDARD)
@@ -128,9 +142,11 @@ sites.l<-unique(sites$SITE_HISTORY_ID)
   
   tab<-table.f(temp.stds,2,max(ncol(temp.stds)))
   label=paste("Applicable Standards:",sites.l[i])
-  tab<-flextable::set_caption(tab,label)
+  tab<-tab %>% 
+    flextable::set_caption(label)
   flextable::docx_value(tab)
   flextable::fit_to_width(tab,max_width = 6)
+  
   rm(temp)
    cat("  \n")
    cat("<br><br>")

@@ -24,10 +24,10 @@ library(dplyr)
 library(forcats)
 
 
-#change the non-detects (blanks) to the reporting limit
-#chem.short<-chem.short %>% 
- # mutate(CHR_RESULT_VALUE=case_when(CHR_VALIDATOR_QUAL=="U"~as.numeric(CHR_REPORTING_DETECT_LIMIT)),
-  #       TRUE~as.numeric(CHR_RESULT_VALUE))
+#change the non-detects (blanks) to 1/2 the MDL
+chem.short<-chem.short %>% 
+  mutate(CHR_RESULT_VALUE=case_when(CHR_VALIDATOR_QUAL=="U"~as.numeric(CHR_METHOD_DETECT_LIMIT*0.5),
+         TRUE~as.numeric(CHR_RESULT_VALUE)))
 
 
 #merge chem.short and sites to get the order, PWL ID and group
@@ -80,7 +80,6 @@ arrange(order)
 
 in.situ.short$SITE_PWL_ID<-factor(in.situ.short$SITE_PWL_ID,ordered = TRUE)
 
-
 #run the exceedance script
 
 #create the stars for the figure
@@ -90,7 +89,15 @@ stars<-temp5 %>%
   summarise(Violations=sum(Violations)) %>% 
   mutate(chemical_name=paste(Parameter))
 
+stars_site<-temp6 %>% 
+  select(site_id,parameter,Violations) %>% 
+  group_by(site_id,parameter) %>% 
+  summarise(Violations=sum(Violations)) %>% 
+  mutate(chemical_name=paste(parameter))
+
+
 stars$PWL_segment<-as.factor(stars$PWL_segment)
+stars_site$site_id<-as.factor(stars_site$site_id)
 
 sbu.insitu.statewide<-sbu.insitu.statewide %>% 
   mutate(chemical_name=case_when(
@@ -114,12 +121,30 @@ stars<-stars %>%
     Parameter=="dissolved_oxygen"~"Dissolved Oxygen",
     Parameter=="ph"~"ph",
     Parameter=="total_dissolved_solids"~"Total Dissolved Solids",
-    Parameter=="iron"~"iron",
+    Parameter=="iron"~"Iron",
     Parameter=="nitrite"~"Nitrogen, Nitrite",
     Parameter=="phosphorus"~"Phosphorus, Total (As P)"
   ))
 
+stars_site<-stars_site %>% 
+  mutate(chemical_name=case_when(
+    parameter=="dissolved_oxygen"~"Dissolved Oxygen",
+    parameter=="ph"~"ph",
+    parameter=="total_dissolved_solids"~"Total Dissolved Solids",
+    parameter=="iron"~"Iron",
+    parameter=="nitrite"~"Nitrogen, Nitrite",
+    parameter=="phosphorus"~"Phosphorus, Total (As P)"
+  )) %>% 
+  filter(Violations!=0)
+#merge the group and order into this list
+stars_site<-merge(stars_site,pwl,
+                  by.x="site_id",
+                  by.y="SITE_HISTORY_ID")
+stars_site$site_id<-forcats::fct_reorder(stars_site$site_id,
+                                         stars_site$order)
+
 stars.insitu<-stars
+stars.insitu_site<-stars_site
 
 #change names to match the chemistry files
 

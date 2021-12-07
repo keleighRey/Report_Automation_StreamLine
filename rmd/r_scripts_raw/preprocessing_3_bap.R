@@ -49,8 +49,6 @@ sum.metrics2<-metrics.short%>%
 sum.metrics<-merge(sum.metrics, sites, by.x=c("MSSIH_EVENT_SMAS_HISTORY_ID","SITE_PWL_ID"),
                    by.y=c("SITE_HISTORY_ID","SITE_PWL_ID"))
 
-sum.metrics$MSSIH_EVENT_SMAS_HISTORY_ID<-factor(sum.metrics$MSSIH_EVENT_SMAS_HISTORY_ID)
-
 #change order to not a factor
 sum.metrics$order<-as.numeric(sum.metrics$order)
 #arrange by order
@@ -59,9 +57,13 @@ sum.metrics<-sum.metrics %>%
 
 #make the PWL ID into an ordered factor for the plot
 sum.metrics$SITE_PWL_ID<-fct_reorder(sum.metrics$SITE_PWL_ID, sum.metrics$order)
+sum.metrics<-sum.metrics %>% 
+  arrange(order)
+sum.metrics$order<-as.numeric(sum.metrics$order)
 #same for site, to get the order of either way of plotting correct
-sum.metrics$MSSIH_EVENT_SMAS_HISTORY_ID<-fct_reorder(sum.metrics$MSSIH_EVENT_SMAS_HISTORY_ID,
-                                                     sum.metrics$group)
+sum.metrics<-sum.metrics %>% 
+  arrange(order)
+sum.metrics$MSSIH_EVENT_SMAS_HISTORY_ID<-fct_reorder(sum.metrics$MSSIH_EVENT_SMAS_HISTORY_ID, sum.metrics$order)
 
 #merge sum.metrics2 with sites to get color
 #need short sites
