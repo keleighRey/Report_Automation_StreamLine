@@ -5,7 +5,8 @@ This is a streamlined version of the Report Automation script, that connects via
 
 ### 1.Copy your data into the "data" folder.  
 
-There are 2 files you need to create, one is the sites file, and one is the intro file.
+There are 3 files you need to create, one is the sites file (.csv), and one is the intro file (.csv) and the last is a map file (.png)
+ 
 
  -Use the template for your sites file located in teh "template" folder. 
  -You will assign group and order here. This will make your figures and tables flow in the order you decide.  
