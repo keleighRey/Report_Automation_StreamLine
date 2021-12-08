@@ -14,7 +14,7 @@ There are 2 files you need to create, one is the sites file, and one is the intr
 ### 2. Input the other parameters into the params on the YAML or using the "knit with parameters" shiny.
 
 **Param list:**
-params:
+params:  
     **tox: FALSE**  #this is either TRUE or FALSE, will run the tox section of hte report if TRUE.  
     **study_name: "Halfway Creek"** #your desired study name. This is continued throughout the text, so keep in mind how it will sound in a sentence.  
     **year_input: 2017** #the year that you want the scripts to start grabbing data from the datamod tables from.  
