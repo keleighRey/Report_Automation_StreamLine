@@ -154,7 +154,12 @@ raw_df$info_type<-as.character(raw_df$info_type)
 raw_df_export<-raw_df
 #take out phosphorus bc it doesn't apply to us
 raw_df<-raw_df %>% 
-  filter(parameter!="phosphorus")
+  filter(parameter!="phosphorus") %>% 
+  mutate(result_type="not-provided") %>% 
+  mutate(method_speciation=case_when(parameter=="ammonia"~"as N",
+                                     parameter=="nitrate"~"as N",
+                                     parameter=="nitrite"~"as N",
+                                     parameter=="nitrate_nitrite"~"as N"))
 
 
 # Extract the package root with base R functions.
@@ -165,14 +170,23 @@ library(stayCALM)
 # This argument is supplied to the Rmarkdown code chunk options.
 export.logical <- TRUE
 
+wqs <- stayCALM::nysdec_wqs %>%
+  dplyr::filter(
+    !(
+      parameter %in% "phosphorus" & type %in% c("aquatic_chronic",
+                                                "health_water-source")
+    ),
+    !grepl("bap", parameter),
+    !parameter %in% "chlorophyll_a"
+  )
 
 #trying out the new script
 wqs_violations <- stayCALM::wqs_violations(
   .data = raw_df,
   .period = stayCALM::from_today("10 years"),
   .targeted_assessment = TRUE,
-  .wipwl_df = stayCALM::wipwl.df,
-  .wqs_df = stayCALM::nysdec_wqs,
+  .wipwl_df = stayCALM::wipwl_df,
+  .wqs_df = wqs,
   .tmdl_df = stayCALM::tmdl_df
 )
 
