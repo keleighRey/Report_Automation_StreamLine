@@ -350,7 +350,7 @@ chem.graph.continuous.site <- function(df, na.rm = TRUE, ...){
       theme(legend.title=element_blank(),legend.margin=margin(10,10,10,10),legend.key = element_rect(colour = NA, fill = NA),legend.background=element_blank())+
       coord_cartesian(clip = "off")
     
-    if(nrow(stars)>1){plot+annotate(geom = "text",label=paste("*"),x=temp.stars$PWL_segment, y=(min(df.1$CHR_RESULT_VALUE[df.1$CHEM_PARAMETER_NAME==chem_list[i]])-10),color="black")}
+    if(nrow(stars)>=1){plot+annotate(geom = "text",label=paste("*"),x=temp.stars$PWL_segment, y=(min(df.1$CHR_RESULT_VALUE[df.1$CHEM_PARAMETER_NAME==chem_list[i]])-10),color="black")}
     
     #geom_rect(aes(xmin = nlevels(y), xmax = nlevels(y)+5, ymin = log10(min(df$result_value[df$chemical_name==chem_list[i]])), ymax = log10(max(df$result_value[df$chemical_name==chem_list[i]]))),
     # fill = "white", alpha = 0.1)# print plots to screen
@@ -420,7 +420,7 @@ chem.graph.continuous.pwl <- function(df, na.rm = TRUE, ...){
       theme(legend.title=element_blank(),legend.margin=margin(10,10,10,10),legend.key = element_rect(colour = NA, fill = NA),legend.background=element_blank())+
       coord_cartesian(clip = "off")
     
-    if(nrow(stars)>=1){plot+annotate(geom = "text",label=paste("*"),x=temp.stars$PWL_segment, y=(min(df.1$CHR_RESULT_VALUE[df.1$CHEM_PARAMETER_NAME==chem_list[i]])-1),color="black")}
+    if(nrow(temp.stars)>=1){plot+annotate(geom = "text",label=paste("*"),x=temp.stars$PWL_segment, y=(min(df.1$CHR_RESULT_VALUE[df.1$CHEM_PARAMETER_NAME==chem_list[i]])-1),color="black")}
     plot+ geom_jitter(data=df.1 %>%filter(high_flow_flag=="high"),color="yellow")
       
     
@@ -454,7 +454,7 @@ chem.graph.continuous.site <- function(df, na.rm = TRUE, ...){
     df$CHS_EVENT_SMAS_HISTORY_ID<-forcats::fct_reorder(df$CHS_EVENT_SMAS_HISTORY_ID,df$order)
     
     temp.statewide<-subset(sbu.chem.statewide,sbu.chem.statewide$CHEM_PARAMETER_NAME==chem_list[i])
-    if(nrow(stars)>1){temp.stars<-subset(stars,stars$Parameter==chem_list[i])}
+    if(nrow(stars)>=1){temp.stars<-subset(stars,stars$Parameter==chem_list[i])}
     
     temp.chem<-subset(df,df$CHEM_PARAMETER_NAME==chem_list[i])
     df.1<-subset(df, df$CHEM_PARAMETER_NAME==chem_list[i])
@@ -494,7 +494,7 @@ chem.graph.continuous.site <- function(df, na.rm = TRUE, ...){
       theme(legend.title=element_blank(),legend.margin=margin(10,10,10,10),legend.key = element_rect(colour = NA, fill = NA),legend.background=element_blank())+
       coord_cartesian(clip = "off")
     
-    if(nrow(stars)>1){plot+annotate(geom = "text",label=paste("*"),x=temp.stars$PWL_segment, y=(min(df.1$CHR_RESULT_VALUE[df.1$CHEM_PARAMETER_NAME==chem_list[i]])-10),color="black")}
+    if(nrow(stars)>=1){plot+annotate(geom = "text",label=paste("*"),x=temp.stars$PWL_segment, y=(min(df.1$CHR_RESULT_VALUE[df.1$CHEM_PARAMETER_NAME==chem_list[i]])-10),color="black")}
     
     #geom_rect(aes(xmin = nlevels(y), xmax = nlevels(y)+5, ymin = log10(min(df$result_value[df$chemical_name==chem_list[i]])), ymax = log10(max(df$result_value[df$chemical_name==chem_list[i]]))),
     # fill = "white", alpha = 0.1)# print plots to screen
