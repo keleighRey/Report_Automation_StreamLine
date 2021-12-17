@@ -129,7 +129,7 @@ chem.graph.site <- function(df, na.rm = TRUE, ...){
   label="Horizontal lines represent the 95th, 75th, and 25th percentiles of statewide data for each endpoint.Boxes represent the interquartile range (25th to 75th percentiles) of the data for each site, whiskers represent the IQR +/- 1.5 times the IQR and dots indicate potential outlier values, or those outside of the IQR +/- 1.5 times the IQR. Stars at the bottom of the graph indicate a violation of a WQS (if applicable). Axis are presented in log scale for comparison by site." 
       
   sbu.chem.statewide$CHEM_PARAMETER_NAME<-tolower(sbu.chem.statewide$CHEM_PARAMETER_NAME)
-  stars_site$chemical_name<-tolower(stars_site$chemical_name)
+  if(nrow(stars_site)>1){stars_site$chemical_name<-tolower(stars_site$chemical_name)}
   # create list of chmistry's in data to loop over 
   chem_list <- unique(df$CHEM_PARAMETER_NAME)
   l<-length(chem_list)
