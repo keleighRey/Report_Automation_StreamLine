@@ -47,7 +47,7 @@ fp <- fp_par(
   padding.bottom = 20, padding.top = 120, 
   border.bottom = fp_border())
 
-ft <- fp_text(shading.color='#EFEFEF', bold = TRUE)
+ft <- fp_text(shading.color='#EFEFEF', bold = FALSE)
 
 study_name=params$study_name
 tox=params$tox

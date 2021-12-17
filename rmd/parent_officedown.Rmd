@@ -8,7 +8,7 @@ output:
     tables:
       style: Table
       layout: autofit
-      width: 1.0
+      width: 0.75
       caption:
         style: Table Caption
         pre: 'Table '
@@ -22,18 +22,18 @@ output:
         sep: '. '
 params:
     tox: FALSE
-    study_name: "Finger Lakes Advanced Monitoring"
+    study_name: "Halfway Creek"
     year_input: 2019
-    intro_file_name: "intro.csv"
-    sites_file_name: "sites_to_assign_order_new.csv"
-    grouping_for_chem: PWL
-    grouping_for_bap: both
+    intro_file_name: "halfway_intro.csv"
+    sites_file_name: "halfway_sites.csv"
+    grouping_for_chem: site
+    grouping_for_bap: site
     map_zoom: 12
     user: kareynol
     limit_to_nuts: TRUE
     data_package: TRUE
     lit_cited_file: "lit_cited.docx"
-    map_fiile: "dodge_png.png"
+    map_file: "dodge_png.png"
       
 ---
 
@@ -79,6 +79,7 @@ user=params$user
 limit_to_nuts=params$limit_to_nuts
 data_package=params$data_package
 lit_cited_file=params$lit_cited_file
+map_file=params$map_file
 
 ```
 
@@ -172,6 +173,9 @@ if(params$tox){cat("# Sediment and Porewater Microtox® Analysis")}
 ```
 
 \newpage
+# Conclusion
+
+
 
 # Section III: Literature Cited
 

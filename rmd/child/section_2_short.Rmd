@@ -84,7 +84,7 @@ sites.l<-unique(sites$SITE_HISTORY_ID)
     #flextable::width(j=NULL,3)
   flextable::fit_to_width(tab,max_width = 3) 
   flextable::autofit(tab)
-  flextable::docx_value(tab)
+  flextable::flextable_to_rmd(tab)
   
   rm(temp)
   rm(tab.label)
@@ -109,7 +109,7 @@ sites.l<-unique(sites$SITE_HISTORY_ID)
   #label=paste("Chemistry Measurements:",sites.l[i])
   tab1<-flextable::set_caption(tab1,tab.cap,style="Table Caption",autonum = run_autonum(seq_id = "tab"))
   flextable::fit_to_width(tab1,max_width = 3) 
-  flextable::docx_value(tab1)
+  flextable::flextable_to_rmd(tab1)
    rm(temp)
    cat("  \n")
    cat("<br><br>")
@@ -134,7 +134,7 @@ sites.l<-unique(sites$SITE_HISTORY_ID)
   tab.cap=paste(label)
   tab1<-flextable::set_caption(tab1,tab.cap,style="Table Caption",autonum = run_autonum(seq_id = "tab"))
   flextable::fit_to_width(tab1,max_width = 3) 
-   flextable::docx_value(tab1)}
+   flextable::flextable_to_rmd(tab1)}
 
    rm(temp)
    cat("  \n")
@@ -174,7 +174,7 @@ sites.l<-unique(sites$SITE_HISTORY_ID)
    tab.cap=paste(label)
    tab3<-flextable::set_caption(tab3,tab.cap,style="Table Caption",autonum = run_autonum(seq_id = "tab"))
    flextable::fit_to_width(tab3,max_width = 3) 
-   flextable::docx_value(tab3)}
+   flextable::flextable_to_rmd(tab3)}
    else{
        cat("  \n\n *Water Quality Standard Excursions*")
      cat("  \n\n There were no water quality standard excursions at this site during the sampling period.")
@@ -200,7 +200,7 @@ sites.l<-unique(sites$SITE_HISTORY_ID)
   label=paste("Biological Assessment Score (BAP) Summary: ",sites.l[i])
   tab.cap=paste(label)
   tab6<-flextable::set_caption(tab6,tab.cap,style="Table Caption",autonum = run_autonum(seq_id = "tab"))
-  flextable::docx_value(tab6)}
+  flextable::flextable_to_rmd(tab6)}
   rm(temp)
   cat("  \n")
   cat("<br><br>")
