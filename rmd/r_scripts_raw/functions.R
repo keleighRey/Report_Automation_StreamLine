@@ -198,7 +198,7 @@ chem.graph.site <- function(df, na.rm = TRUE, ...){
       coord_cartesian(clip = "off")
     
     
-    if(nrow(temp.stars)>=1){
+    if(nrow(stars)>=1){
       plot+annotate(geom = "text",label=paste("*"),x=temp.stars$site_id, y=(min(df.1$CHR_RESULT_VALUE[df.1$CHEM_PARAMETER_NAME==chem_list[i]]+100,na.rm=TRUE)),color="black")
       }
     
