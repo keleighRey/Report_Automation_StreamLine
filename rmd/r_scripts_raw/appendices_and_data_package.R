@@ -77,7 +77,8 @@ chem_export<-chem_export %>%
 
 viol_small<-wqs_violations$violation_data %>% 
   select(seg_id,site_id,date,parameter, result,fraction, 
-         units,use,statistic,threshold,attaining_wqs,sample_count)
+         units,use,statistic,threshold,attaining_wqs,sample_count) %>% 
+  tidyr::separate_rows(site_id,sep=";")
 
 viol_small<-viol_small %>% 
   mutate(units=case_when(parameter=="ph"~paste("ph units"),
