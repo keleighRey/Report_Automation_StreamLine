@@ -7,29 +7,28 @@ word_document: default
 ---
 
 ```{r include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = FALSE)
 intro<-read.csv(here::here("data",intro_file_name),stringsAsFactors = FALSE)
+
 ```
+
 `r paste(intro$intro)`
 
-The Steam Monitoring and Assessment Section (SMAS) conducted targeted stream monitoring that included:  
+The Steam Monitoring and Assessment Section (SMAS) conducted targeted stream monitoring that included:
 
-1. Benthic Macroinvertebrate Community Analysis
-2. Water Quality Measurements
-3. Stream Reach Physical Habitat Characteristics
-4. Observer Ranking of Recreational Ability
-`r if(tox){paste("5. Sediment and Porewater Microtox Analysis")}`
+`r if(bap){paste("*  Benthic Macroinvertebrate Community Analysis")}`
+-   Water Quality Measurements
+`r if(habitat){paste("*  Stream Reach Physical Habitat Characteristics")}`
+-   Observer Ranking of Recreational Ability
+`r if(tox){paste("* Sediment and Porewater Microtox Analysis")}`
 
-This data report includes two sections: I) an overview of the sampling events described above, `r if(grouping_for_chem=="PWL"){paste("with results aggregated by WI/PWL segment,")}`  and II) a site-specific data summary to present all major findings for each site. Additional sections (III, IV) include literature cited and appendices covering all references and additional source material.
+This data report includes two sections: I) an overview of the sampling events described above, `r if(grouping_for_chem=="PWL"){paste("with results aggregated by WI/PWL segment,")}` and II) a site-specific data summary to present all major findings for each site. Additional sections (III, IV) include literature cited and appendices covering all references and additional source material.
 
-The `r params$study_name` site descriptions (Table \@ref(tab:sites-table)) and locations (Figure \@ref(fig:site-map)), and sampling dates (Table \@ref(tab:sites-dates)) are included below. 
-
-```{r include=FALSE,message=FALSE,warning=FALSE}
-
-```
+The `r params$study_name` site descriptions (Table \@ref(tab:sites-table)) and locations (Figure \@ref(fig:site-map)), and sampling dates (Table \@ref(tab:sites-dates)) are included below.
 
 ```{r tab.id="sites-table",  echo=FALSE, message=FALSE, warning=FALSE, tab.cap="Sampling locations.",sep="."}
 
+library(dplyr)
 library(flextable)
 # tl<-flextable(table1) %>% font(i = NULL, j = NULL, fontname="Arial", part = "all") %>% theme_zebra() %>% autofit()
 # tl<-align(tl, i = NULL, j =(2:5) , align = "center", part = "all")%>%
@@ -46,17 +45,14 @@ tl<-table.f(table1,2,max(ncol(table1)))
 tl
 ```
 
-  
 ```{r site-map, echo=FALSE, fig.cap="Map of sampling locations. Site names reference the Location ID and River Mile.", message=FALSE, warning=FALSE}
 
 knitr::include_graphics(here::here(paste("data/map/",params$map_file,sep = "")))
   
 ```
 
-
-
 ```{r tab.id="sites-dates",  echo=FALSE, message=FALSE, warning=FALSE, tab.cap="Sampling dates and overall parameters for the study period included in this report."}
 
-table.f(dates_all,2,ncol(dates_all))
-
+tl<-table.f(dates_all,2,max(ncol(dates_all)))
+tl
 ```

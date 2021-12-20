@@ -22,6 +22,8 @@ output:
         sep: '. '
 params:
     tox: FALSE
+    bap: FALSE
+    habitat: FALSE
     study_name: "Halfway Creek"
     year_input: 2017
     intro_file_name: "halfway_intro.csv"
@@ -51,6 +53,8 @@ ft <- fp_text(shading.color='#EFEFEF', bold = FALSE)
 
 study_name=params$study_name
 tox=params$tox
+bap=params$bap
+habitat=params$habitat
 intro_file_name=params$intro_file_name
 sites_file_name=params$sites_file_name
 year.input=params$year_input
@@ -75,8 +79,8 @@ source(here::here("rmd/r_scripts_raw/functions.R"))
 source(here::here("rmd/r_scripts_raw/preprocessing_1_raw.R"))
 year.input=params$year_input
 source(here::here("rmd/r_scripts_raw/preprocessing_2_chemistry.R"))
-source(here::here("rmd/r_scripts_raw/preprocessing_3_bap.R"))
-source(here::here("rmd/r_scripts_raw/preprocessing_4_habitat.R"))
+if (params$bap) {source(here::here("rmd/r_scripts_raw/preprocessing_3_bap.R"))}
+if (params$habitat) {source(here::here("rmd/r_scripts_raw/preprocessing_4_habitat.R"))}
 source(here::here("rmd/r_scripts_raw/preprocessing_5_user_perception.R"))
 source(here::here("rmd/r_scripts_raw/preprocessing_6_tox.R"))
 source(here::here("rmd/r_scripts_raw/appendices_and_data_package.R"))
@@ -98,20 +102,18 @@ source(here::here("rmd/r_scripts_raw/preprocessing_7_sect_2.R"))
 
 # Section I: Overview
 
-## Benthic Macroinvertebrate Community 
-```{r child="child/section1B_BAP.Rmd"}
+```{r if(params$bap){child="child/section1B_BAP.Rmd"}}
+if(params$bap){cat("## Benthic Macroinvertebrate Community")}
 
 ```
-\newpage
 
 ## Water Quality
 ```{r child="child/section1A_chemistry_stream_discharge.Rmd"}
 
 ```
-\newpage
 
-## Stream Reach Physical Characteristics
-```{r child="child/section1C_stream_reach_phys.Rmd"}
+```{r if(params$habitat){child="child/section1C_stream_reach_phys.Rmd"}}
+if(params$habitat){cat("## Stream Reach Physical Habitat Characteristics")}
 
 ```
 

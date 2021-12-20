@@ -118,7 +118,6 @@ table.f<-function(df,x,y){
   tl<-fontsize(tl,size = 8,part = "all")
   tl<-autofit(tl)
   tl<-set_table_properties(tl,layout="autofit")
-  tl
 }
 ####################################################################################
 #Chemistry grouped by site

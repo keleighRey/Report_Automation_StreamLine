@@ -14,32 +14,32 @@ library(dplyr)
 ##########################################################################################get pwl lines for map
 #mapl<-read.csv(here::here("data","map_lines_use.csv"),stringsAsFactors = FALSE)
 
-#map function
-map.me<-function(df1,df2){
-  df1$SITE_LONGITUDE<-as.numeric(df1$SITE_LONGITUDE)
-  df1$SITE_LATITUDE<-as.numeric(df1$SITE_LATITUDE)
-  df2$SITE_LATITUDE<-as.numeric(df2$SITE_LATITUDE)
-  df2$SITE_LONGITUDE<-as.numeric(df2$SITE_LONGITUDE)
-  #bounding box
-library(ggmap)
-nybox<-make_bbox(df1,lon=SITE_LONGITUDE,lat=SITE_LATITUDE)
- 
-ny.map<-qmap(nybox, source = "osm",color="bw")+
-  #geom_path(data=subset(mapl,type=="trib"),aes(x = long, y = lat,group=group),color="steelblue1",alpha=0.5,,na.rm=TRUE)+
-  #geom_path(data=subset(mapl,type=="main"),aes(x = long, y = lat,group=group),color="slateblue3",size=0.9,,na.rm=TRUE)+
-theme(legend.title=element_blank(),legend.margin=margin(10,10,10,10),legend.key = element_rect(colour = NA, fill = NA),legend.background=element_blank())+
-geom_point(data=df1,aes(x=SITE_LONGITUDE,y=SITE_LATITUDE),
-                  color="yellow",size=4)+
-  geom_point(data=df2,aes(x=SITE_LONGITUDE,y=SITE_LATITUDE),color="red",size=4)+
-  geom_label_repel(data=df2,
-   label= df2$SITE_HISTORY_ID, 
-  aes(x=SITE_LONGITUDE,
-  y=SITE_LATITUDE),box.padding   = 0.35, point.padding = 0.5,
-                  segment.color = 'grey50',size=2)
-  
-print(ny.map)
-  
-}
+# #map function
+# map.me<-function(df1,df2){
+#   df1$SITE_LONGITUDE<-as.numeric(df1$SITE_LONGITUDE)
+#   df1$SITE_LATITUDE<-as.numeric(df1$SITE_LATITUDE)
+#   df2$SITE_LATITUDE<-as.numeric(df2$SITE_LATITUDE)
+#   df2$SITE_LONGITUDE<-as.numeric(df2$SITE_LONGITUDE)
+#   #bounding box
+# library(ggmap)
+# nybox<-make_bbox(df1,lon=SITE_LONGITUDE,lat=SITE_LATITUDE)
+#  
+# ny.map<-qmap(nybox, source = "osm",color="bw")+
+#   #geom_path(data=subset(mapl,type=="trib"),aes(x = long, y = lat,group=group),color="steelblue1",alpha=0.5,,na.rm=TRUE)+
+#   #geom_path(data=subset(mapl,type=="main"),aes(x = long, y = lat,group=group),color="slateblue3",size=0.9,,na.rm=TRUE)+
+# theme(legend.title=element_blank(),legend.margin=margin(10,10,10,10),legend.key = element_rect(colour = NA, fill = NA),legend.background=element_blank())+
+# geom_point(data=df1,aes(x=SITE_LONGITUDE,y=SITE_LATITUDE),
+#                   color="yellow",size=4)+
+#   geom_point(data=df2,aes(x=SITE_LONGITUDE,y=SITE_LATITUDE),color="red",size=4)+
+#   geom_label_repel(data=df2,
+#    label= df2$SITE_HISTORY_ID, 
+#   aes(x=SITE_LONGITUDE,
+#   y=SITE_LATITUDE),box.padding   = 0.35, point.padding = 0.5,
+#                   segment.color = 'grey50',size=2)
+#   
+# print(ny.map)
+#   
+# }
 
 #########################################################################################
 #table of class and what's what
@@ -217,6 +217,7 @@ wqs_table<-wqs_table %>%
 ######################################################################################
 #Bap summary
 #summary for the BAP
+if(bap){
 bap.df<-metrics.short %>% 
   select(MSSIH_EVENT_SMAS_HISTORY_ID,MSSIH_EVENT_SMAS_SAMPLE_DATE,MMDH_BIO_ASMT_PROFILE_SCORE,year) %>% 
   rename(DATE=MSSIH_EVENT_SMAS_SAMPLE_DATE) %>% 
@@ -230,6 +231,7 @@ bap.df<-metrics.short %>%
 
 bap.df<-bap.df%>% 
   mutate_if(is.numeric, round, 2)
+}
 
 #get flow stuff
 #flow<-readxl::read_excel(here::here("data","20210607_S_Sample_Event_Info_field_all_fields.xlsx"))
@@ -280,16 +282,11 @@ field<-chem_export_2 %>%
          Parameter=="dissolved oxygen"|
            Parameter=="temperature")
 
+field.params<-unique(field$Parameter)#filter the field parameters out of the chemistry tables
+
 chemistry_section2<-chem_export_2 %>% 
     mutate(Parameter=tolower(Parameter)) %>% 
-  filter(Parameter!="dissolved oxygen saturation",
-         Parameter!="ph",
-         Parameter!="salinity",
-         Parameter!="chlorophyll a (probe)",
-         Parameter!="phycocyanin (probe)",
-         Parameter!="specific conductance",
-         Parameter!="dissolved oxygen",
-         Parameter!="temperature")
+  filter(!Parameter %in% field.params)
 
 
 prepped<-wqs_violations$prep_data

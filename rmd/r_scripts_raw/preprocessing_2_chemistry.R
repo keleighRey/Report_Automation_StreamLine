@@ -156,7 +156,7 @@ chem.no.trans$CHEM_PARAMETER_NAME<-tolower(chem.no.trans$CHEM_PARAMETER_NAME)
 chem.no.trans$CHEM_PARAMETER_NAME<-str_to_title(chem.no.trans$CHEM_PARAMETER_NAME)
 
 #make a summary table for dates included in the analysis######################################
-
+if(bap){
 dates_chem<-chem.short %>% 
   select(CHS_EVENT_SMAS_HISTORY_ID,CHS_EVENT_SMAS_SAMPLE_DATE) %>%
   group_by(CHS_EVENT_SMAS_HISTORY_ID,CHS_EVENT_SMAS_SAMPLE_DATE) %>% 
@@ -184,4 +184,20 @@ dates_all<-merge(dates_chem,dates_bap,by=c("sample_id","date"),all = TRUE)
 dates_all<-dates_all %>% 
   rename(Site=sample_id,
          Date=date)
+}
+#this is one for just chemistry dates
+if(!bap){
+dates_chem<-chem.short %>% 
+  select(CHS_EVENT_SMAS_HISTORY_ID,CHS_EVENT_SMAS_SAMPLE_DATE) %>%
+  mutate(Year=format(CHS_EVENT_SMAS_SAMPLE_DATE,"%Y")) %>% 
+  distinct()
+ dates_chem_2<-dates_chem %>% 
+  select(CHS_EVENT_SMAS_HISTORY_ID,Year) %>% 
+  mutate(num_events=as.numeric(1)) %>% 
+  group_by(CHS_EVENT_SMAS_HISTORY_ID, Year) %>%
+  summarise(Events=sum(num_events)) %>% 
+  distinct()
+dates_all<-dates_chem_2 %>% 
+  rename(Site=CHS_EVENT_SMAS_HISTORY_ID)
+}
 

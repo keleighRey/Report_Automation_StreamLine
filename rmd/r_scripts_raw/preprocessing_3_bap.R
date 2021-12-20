@@ -3,7 +3,9 @@
 #needs functions and preprocessing 1 to begin
 #source("rmd/r_scripts_raw/preprocessing_1.R")
 #source("rmd/r_scripts_raw/functions.R")
+bap=params$bap
 
+if(bap){
 library(tidyverse)
 #print("Please specify the year for BAP scores before continuing.IF you want all, please unhash line 21 and put year as 1973 (beginning of all data records).")
 
@@ -113,3 +115,4 @@ bap.inc<-sum.metrics2 %>%
   mutate(mean.plus=mean+ci,mean.mimnus=mean-ci) %>% 
   subset(mean.plus>=5 & mean.plus<=6|mean.mimnus>=4 & mean.mimnus<=5)
 
+}
