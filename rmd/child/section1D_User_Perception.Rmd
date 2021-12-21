@@ -31,23 +31,25 @@ plot2<-ggplot(contact, aes(x=PWL, y=value, fill=`Contact Type`))+
 
 
 ```
-Perceptions of recreational ability were ranked at all sampling locations as per standard site visit protocols (SOP #208-19). The observer ranking of recreational ability is a method of evaluating impacts to recreational use of a stream segment. Impacts to recreational use have been correlated with biological impairment from nutrient enrichment and rankings above slightly impacted (rank of 3) are indicative of significant impacts to recreational ability (Smith et al., 2014). The ranking assesses primary (1°) and secondary (2°) contact recreation, as well as a user’s desire to fish.
+Perceptions of recreational ability were ranked at all sampling locations as per standard site visit protocols (SOP #208-19). The observer (NYSDEC field staff) ranking of recreational ability is a method of evaluating impacts to recreational use of a stream segment. Impacts to recreational use have been correlated with biological impairment from nutrient enrichment and rankings above slightly impacted (rank of 3) are indicative of significant impacts to recreational ability (Smith et al., 2014). The ranking assesses primary and secondary contact recreation, as well as a user’s desire to fish.
 
-The first two questions of the recreational use evaluation describe the observers perceived ability to participate in 1° and 2° contact recreation. Results of this ranking are the primary gauge of whether the `r study_name` sites are achieving the designated recreational uses. Figure \@ref(fig:userP-rank) illustrates the average observer ranking for desire to participate in 1° and 2° contact recreation at each sampling location. User rankings of recreational desirability ranged from 0 (best) to 5 (worst) where,as described above, a measurable impact was related to a ranking of 3 and above (Smith et al., 2014). Values of 6 were the result of 1° or 2° degree contact not being applicable due to site condition and were removed from mean aggregations. Results of this survey suggest observers (NYSDEC field staff) considered the desire to participate in 1° and 2° contact recreation to be slightly impacted (ranked > 3) at `r length(unique(slight.imp$PWL))`  WI/PWL segments `r paste(unique(slight.imp$PWL),sep=",")`(Figure \@ref(fig:userP-rankb)).
+The first two questions of the recreational use evaluation describe the observers perceived ability to participate in primary and secondary contact recreation. Results of this ranking are the primary gauge of whether the `r study_name` sites are achieving the designated recreational uses. Figure \@ref(fig:userP-rank) illustrates the average observer ranking for desire to participate in primary and secondary contact recreation at each sampling location. User rankings of recreational desirability ranged from 0 (best) to 5 (worst) where,as described above, a measurable impact was related to a ranking of 3 and above (Smith et al., 2014). Results of this survey suggest observers considered the desire to participate in primary and secondary contact recreation to be slightly impacted (ranked > 3) at `r length(unique(slight.imp$PWL))`  WI/PWL segments `r paste(unique(slight.imp$PWL),sep=",")`(Figure \@ref(fig:userP-rankb)).
 
-```{r  userP-rank, fig.cap="Mean observer ranking of recreational ability for each sampling location. Columns represent observer rankings for the desire to participate in 1° and 2° contact recreation. Ranking of recreation ability was performed for all locations during each site visit." , fig.width=7, fig.height=4, echo=FALSE, message=FALSE,warning=FALSE}
+```{r  userP-rank, fig.cap="Mean observer ranking of recreational ability for each sampling location. Columns represent observer rankings for the desire to participate in primary and secondary contact recreation. Ranking of recreation ability was performed for all locations during each site visit." , fig.width=7, fig.height=4, echo=FALSE, message=FALSE,warning=FALSE}
 plot
 ```
 
-```{r  userP-rankb, fig.cap="Mean observer ranking of recreational ability for sampling locations, grouped by WI/PWL. Columns represent observer rankings for the desire to participate in 1° and 2° contact recreation. Ranking of recreational ability was performed for all locations during each site visit." , fig.width=7, fig.height=4, echo=FALSE, message=FALSE,warning=FALSE}
+```{r  userP-rankb, fig.cap="Mean observer ranking of recreational ability for sampling locations, grouped by WI/PWL. Columns represent observer rankings for the desire to participate in primary and secondary contact recreation. Ranking of recreational ability was performed for all locations during each site visit." , fig.width=7, fig.height=4, echo=FALSE, message=FALSE,warning=FALSE}
 plot2
 ```
 \newpage
 
-Additional recreational usability questions rank in-stream and stream-side factors on a scale of 0-10 (0 – Best/Natural; 10 Worst/Severe). Those factors are: 1) Water Clarity, 2) Trash, 3) Periphyton, 4) Odor, and 5) Discharge Pipes. These visual and olfactory observations help isolate negative factors influencing the user’s perception of recreational use. Table \@ref(tab:UserP-mean-factor) shows the mean recorded value for these factors at each sampling location and Table \@ref(tab:UserP-dominant-factor) lists the users selection of the most dominant impediment that reduces the observer’s desire to participate in 1° and 2° contact recreation, which can include the factors above, as well as ease of access and proximity to development.
+Additional recreational usability questions rank in-stream and stream-side factors on a scale of 0-10 (0 – Best/Natural; 10 Worst/Severe). Those factors are: 1) Water Clarity, 2) Trash, 3) Periphyton, 4) Odor, and 5) Discharge Pipes. These visual and olfactory observations help isolate negative factors influencing the user’s perception of recreational use. Table \@ref(tab:UserP-mean-factor) shows the mean recorded value for these factors at each sampling location and Table \@ref(tab:UserP-dominant-factor) lists the users selection of the most dominant impediment that reduces the observer’s desire to participate in  recreational activities, which can include the factors above, as well as ease of access and proximity to development.
 
-```{r tab.id="UserP-mean-factor", tab.cap="Mean observer ranked value for factors influencing desire to participate in 1° and 2° contact recreation. Factors were ranked on a 10 scale (0 – Best/Natural; 10 Worst/Severe) according to perceived impact on a location. Ranking of recreational ability was performed for all locations during each site visit", echo=FALSE, message=FALSE, warning=FALSE}
+```{r tab.id="UserP-mean-factor", echo=FALSE, message=FALSE, warning=FALSE}
 final_table<-table.f(Variables,2,2)
+
+final_table<-set_caption(final_table,caption="Mean observer ranked value for factors influencing desire to participate in primary and secondary contact recreation. Factors were ranked on a 10 scale (0 – Best/Natural; 10 Worst/Severe) according to perceived impact on a location. Ranking of recreational ability was performed for all locations during each site visit",style="Table Caption",autonum = run_autonum(seq_id = "tab",prop=officer::fp_text_lite(bold = FALSE)))
 
 final_table<-final_table %>% 
 flextable::bg(j=1,part = "body",bg = "white") %>% 
@@ -62,8 +64,9 @@ final_table
 \newpage
 
 
-```{r tab.id="UserP-dominant-factor", tab.cap="Most frequently ranked factor influencing observer desire to participate in 1° and 2° contact recreation. Factors influencing desire to recreate were ranked and a primary factor influencing the desire to participate in 1° and 2° contact recreation was chosen during each site visit. Column values represent the factor selected most frequently at each site.", message = F, warning = F, echo= F}
+```{r tab.id="UserP-dominant-factor", message = F, warning = F, echo= F}
 final_table2<-table.f(Dominant,2,2) 
+final_table2<-set_caption(final_table2,caption="Most frequently ranked factor influencing observer desire to participate in primary and secondary contact recreation. Factors influencing desire to recreate were ranked and a primary factor influencing the desire to participate in primary and secondary contact recreation was chosen during each site visit. Column values represent the factor selected most frequently at each site.",style="Table Caption",autonum = run_autonum(seq_id = "tab",prop=officer::fp_text_lite(bold = FALSE)))
 
 final_table2<-final_table2 %>% 
   flextable::merge_v(j=1) %>% 

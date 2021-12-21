@@ -8,12 +8,13 @@ output:
 `r if(tox){paste("Toxicity testing of surface waters, sediments, porewaters, and effluents are routinely performed as part of the RIBS program (https://www.dec.ny.gov/chemical/29854.html). Sediment toxicity was evaluated according to SOP #403-16 Microtox® Acute Toxicity Test for Sediments, Porewaters and Effluents. Testing procedures use a bioassay to assess potential acute toxicity in sediments and surface waters to aquatic life (SOP #403-16). Sediment and extracted sediment porewater samples are tested using a bioluminescent bacterium Vibrio fischeri (V. fischeri). Tests are a measure of light reduction between collected samples and a control following a 15-minute exposure period and expressed as the median effect concentration (EC50) of a sample that causes a 50% reduction in light emission from the V. fischeri. Appendix V (Fact Sheet: Acute & Chronic Toxicity Assessments of NY Streams & Rivers) describes toxicity testing procedures, Assessment criteria and results classifications. ")}`
 
 
-```{r tab.id="Tox-table", tab.cap="Wallkill River Microtox® sediment and porewater toxicity results for select locations in the Wallkill River Survey. Sediment samples were collected for toxicity testing in baseflow conditions during macroinvertebrate community collection at sampling locations.", echo=FALSE, message=FALSE, warning=FALSE}
+```{r tab.id="Tox-table", echo=FALSE, message=FALSE, warning=FALSE}
 #call table function
 if (nrow(tox.tbl>0)){
   table.f(tox.tbl,2,6)%>%
   flextable::fontsize(size = 10, part = "all")%>%
   flextable::width(j=3:6, width=1.2)
+  tl<-set_caption(final_table, tab.cap=("Wallkill River Microtox® sediment and porewater toxicity results for select locations in the Wallkill River Survey. Sediment samples were collected for toxicity testing in baseflow conditions during macroinvertebrate community collection at sampling locations."),style="Table Caption",autonum = run_autonum(seq_id = "tab",prop=officer::fp_text_lite(bold = FALSE)))
   }
 
 

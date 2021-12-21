@@ -12,11 +12,12 @@ Habitat model affinity (HMA) scores and resulting final physical habitat assessm
 
 <!---BLOCK_LANDSCAPE_START--->
 
-```{r tab.id="Habitat-table", tab.cap="Ranked habitat characteristics and calculated HMA. Epifaunal substrate (Epi. Cover); Embeddedness/Pool Substrate Characterization (Embed. Pool.); Velocity Depth Regime/Pool Variability (Vel/Dep Reg.); Sediment Deposition (Sed. Dep.); Channel Flow Status (Flow Status); Channel Alteration (Chan. Alt.); Riffle Frequency/Stream Sinuosity (Rif. Freq.); Left and Right Bank Stability (L.B. and R.B. Stability); Left and Right Bank Vegetation (L.B. and R.B. Veg); Width of Left and Right Bank Vegetative Zone (L.B. and R.B. Veg Zone); Habitat Model Affinity Score (HMA Score); HMA Assessment (HMA Assess.)", echo=FALSE, message=FALSE,warning=FALSE}
+```{r tab.id="Habitat-table", echo=FALSE, message=FALSE,warning=FALSE}
 
 
 #call the function
 tl<-table.f(habit.hma[,c(38,1,2:15,36,37)],2,17)
+tl<-set_caption(tl,tab.cap=("Ranked habitat characteristics and calculated HMA. Epifaunal substrate (Epi. Cover); Embeddedness/Pool Substrate Characterization (Embed. Pool.); Velocity Depth Regime/Pool Variability (Vel/Dep Reg.); Sediment Deposition (Sed. Dep.); Channel Flow Status (Flow Status); Channel Alteration (Chan. Alt.); Riffle Frequency/Stream Sinuosity (Rif. Freq.); Left and Right Bank Stability (L.B. and R.B. Stability); Left and Right Bank Vegetation (L.B. and R.B. Veg); Width of Left and Right Bank Vegetative Zone (L.B. and R.B. Veg Zone); Habitat Model Affinity Score (HMA Score); HMA Assessment (HMA Assess.)"),style="Table Caption",autonum = run_autonum(seq_id = "tab",prop=officer::fp_text_lite(bold = FALSE)))
 
 #this part might have to be figured out later, with a larger caption/table function? Not sure yet.
 
