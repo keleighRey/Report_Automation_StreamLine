@@ -39,24 +39,25 @@ habitat.short$SITE_PWL_ID<-factor(habitat.short$SITE_PWL_ID, ordered = TRUE)
 
 habitat.short[4:16] <- sapply(habitat.short[4:16],as.numeric)
 
+habitat.short[habitat.short==-9999]<-NA
+
 #average all aspects by site
 habitat.df<-habitat.short%>%
   group_by(HFDH_EVENT_SMAS_HISTORY_ID, HFDH_GRADIENT)%>%
-  summarize(`Epi.\n Cover`=mean(HFDH_EPIFAUNAL_COVER),
-            `Embed. \n Pool.`=mean(HFDH_EMBEDDEDNESS_POOLING),
-            `Vel/Dep. \n Reg.`=mean(HFDH_VELOCITY_DEPTH_REGIME),
-            `Sed. \n Dep.`=mean(HFDH_SEDIMENT_DEPOSITION),
-            `Flow \n Status`=mean(HFDH_FLOW_STATUS),
-            `Chan. \n Alt`=mean(HFDH_CHANNEL_ALTERATION),
-            `Rif. \n Freq`=mean(HFDH_RIFFLE_BEND_FREQUENCY),
-            `L.B. \n Stability`=mean(HFDH_LEFT_BANK_STABILITY),
-            `R.B. \n Stability`=mean(HFDH_RIGHT_BANK_STABILITY),
-            `L.B. \n Veg`=mean(HFDH_LEFT_BANK_VEG),
-            `R.B.\n Veg`=mean(HFDH_RIGHT_BANK_VEG),
-            `L.B. \n Veg Zone`=mean(HFDH_LEFT_BANK_VEG_ZONE),
-            `R.B. \n Veg Zone`=mean(HFDH_RIGHT_BANK_VEG_ZONE))
+  summarize(`Epi.\n Cover`=mean(HFDH_EPIFAUNAL_COVER, na.rm=TRUE),
+            `Embed. \n Pool.`=mean(HFDH_EMBEDDEDNESS_POOLING, na.rm=TRUE),
+            `Vel/Dep. \n Reg.`=mean(HFDH_VELOCITY_DEPTH_REGIME, na.rm=TRUE),
+            `Sed. \n Dep.`=mean(HFDH_SEDIMENT_DEPOSITION, na.rm=TRUE),
+            `Flow \n Status`=mean(HFDH_FLOW_STATUS, na.rm=TRUE),
+            `Chan. \n Alt`=mean(HFDH_CHANNEL_ALTERATION, na.rm=TRUE),
+            `Rif. \n Freq`=mean(HFDH_RIFFLE_BEND_FREQUENCY, na.rm=TRUE),
+            `L.B. \n Stability`=mean(HFDH_LEFT_BANK_STABILITY, na.rm=TRUE),
+            `R.B. \n Stability`=mean(HFDH_RIGHT_BANK_STABILITY, na.rm=TRUE),
+            `L.B. \n Veg`=mean(HFDH_LEFT_BANK_VEG, na.rm=TRUE),
+            `R.B.\n Veg`=mean(HFDH_RIGHT_BANK_VEG, na.rm=TRUE),
+            `L.B. \n Veg Zone`=mean(HFDH_LEFT_BANK_VEG_ZONE, na.rm=TRUE),
+            `R.B. \n Veg Zone`=mean(HFDH_RIGHT_BANK_VEG_ZONE, na.rm=TRUE))
 
-habitat.df[habitat.df=="-9999"]<-NA
 
 
 

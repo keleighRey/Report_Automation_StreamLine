@@ -20,6 +20,7 @@ output:
         style: Image Caption
         pre: 'Figure '
         sep: '. '
+        fp_text: !expr officer::fp_text_lite(bold = FALSE)
 params:
     tox: FALSE
     bap: FALSE
@@ -39,8 +40,8 @@ params:
      
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, fig.cap = TRUE)
+```{r setup, include=FALSE,eval.expr=TRUE}
+knitr::opts_chunk$set(echo = FALSE)
 library(officedown)
 library(officer)
 
@@ -49,7 +50,12 @@ fp <- fp_par(
   padding.bottom = 20, padding.top = 120, 
   border.bottom = fp_border())
 
-ft <- fp_text(shading.color='#EFEFEF', bold = FALSE)
+fp_text(shading.color='#EFEFEF', bold = FALSE)
+knitr::opts_chunk$set(fp_text_lite(bold = FALSE))
+
+# knitr::opts_chunk$set(
+#   fig.cap,
+# )
 
 study_name=params$study_name
 tox=params$tox
@@ -68,6 +74,15 @@ data_package=params$data_package
 lit_cited_file=params$lit_cited_file
 map_file=params$map_file
 
+knitr::opts_chunk$set(tab.topcaption = TRUE)
+knitr::opts_chunk$set(fp_text_lite(bold = FALSE))
+knitr::opts_chunk$set(
+  fig.cap.style="Image Caption",
+  fig.cap = fp_text(fp_text_lite(bold = FALSE)),
+  align = "Center",
+  bold = FALSE
+)
+  
 ```
 
 
@@ -93,6 +108,7 @@ source(here::here("rmd/r_scripts_raw/preprocessing_7_sect_2.R"))
 <!---BLOCK_TOC--->
 
 <!---CHUNK_PAGEBREAK--->
+
 
 # General
 ```{r child="child/section1_General.Rmd"}

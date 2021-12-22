@@ -37,6 +37,7 @@ contact<-merge(contact,pwl,by.x="Site",by.y="SITE_HISTORY_ID")
 contact<-contact %>% 
   rename(PWL=SITE_PWL_ID)
 
+userp.short[userp.short == -9999] <- NA
 
 Variables<-userp.short%>%
   group_by(UPFDH_EVENT_SMAS_HISTORY_ID)%>%

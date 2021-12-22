@@ -111,7 +111,7 @@ names(group_colors)<-c(groups)
 ```
 
 
-```{r chemgraph1, echo=FALSE, fig.width=7.5, fig.height=6, message=FALSE, warning=FALSE, fig.cap=paste(unique(chem.trans$CHEM_PARAMETER_NAME), ", " , label, sep="")}
+```{r chemgraph1, echo=FALSE, fig.width=7, fig.height=6,fig.align='center', message=FALSE, warning=FALSE, fig.cap=paste(unique(chem.trans$CHEM_PARAMETER_NAME), ", " , label, sep="")}
   
 
 if(nrow(chem.trans)>1 & grouping_for_chem=="site"){
@@ -131,7 +131,7 @@ if(nrow(chem.trans)>1 & grouping_for_chem=="PWL"){
 ```
 
 
-```{r turb, echo=FALSE, fig.width=7.5, fig.height=6, message=FALSE, warning=FALSE, fig.cap=paste(unique(chem.no.trans$CHEM_PARAMETER_NAME), ", " , label, sep="")}
+```{r turb, echo=FALSE, fig.width=7, fig.height=6, fig.align='center',message=FALSE, warning=FALSE, fig.cap=paste(unique(chem.no.trans$CHEM_PARAMETER_NAME), ", " , label, sep="")}
 
 #this one for the other values (no transformation of units-in situ data)
  
@@ -147,7 +147,7 @@ if (nrow(chem.no.trans)>0 & grouping_for_chem=="PWL"){
 
 
 
-```{r insituChem, echo=FALSE, fig.width=7.5, fig.height=6, message=FALSE, warning=FALSE, fig.cap=paste(unique(in.situ.short$CHEM_PARAMETER_NAME), ", " , label, sep="")}
+```{r insituChem, echo=FALSE, fig.width=7, fig.height=6, fig.align='center',message=FALSE, warning=FALSE, fig.cap=paste(unique(in.situ.short$CHEM_PARAMETER_NAME), ", " , label, sep="")}
 
 #this one for the other values (no transformation of units-in situ data)
  

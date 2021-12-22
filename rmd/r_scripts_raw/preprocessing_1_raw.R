@@ -42,6 +42,7 @@ SBU.metrics<-read.csv(paste("C:/Users/",user,"/New York State Office of Informat
 SBU.in.situ.chem<-read.csv(paste("C:/Users/",user,"/New York State Office of Information Technology Services/SMAS - Streams Data Modernization/Cleaned Files/Final_SBU_Field_ITS/Master_S_IN_SITU_WATER_CHEM_v4_Internal_Format_created_2021_12_07.csv",sep=""))
 #dodge<-read.csv(here::here("data/Dodge_Creek_Field/c20210924_Dodge_Creek_2021_In_situ.csv"))
 #SBU.in.situ.chem<-rbind(SBU.in.situ.chem,dodge)
+SBU.in.situ.chem[SBU.in.situ.chem==-9999]<-NA
 
 SBU.chem.sample<-read.csv(paste("C:/Users/",user,"/New York State Office of Information Technology Services/SMAS - Streams Data Modernization/Cleaned Files/Final_Chemistry_ITS/MASTER_S_CHEM_HISTORY_SAMPLE_2021-05-03.csv",sep=""),stringsAsFactors = FALSE)
 #SBU.chem.sample<-read.csv(paste("C:/Users/",user,"/New York State Office of Information Technology Services/SMAS - Streams Data Modernization/Cleaned Files/Final_Chemistry_ITS/dodge_sample.csv",sep=""),stringsAsFactors = FALSE)

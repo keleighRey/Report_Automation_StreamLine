@@ -247,7 +247,9 @@ flow<-field.short %>%
 #chemistry; using the stayCALM
 options(digits = 2)
 
-chem_export_2<-chem_export %>% 
+chem_export_2<-chem_export %>%
+  select(Site,Parameter,Fraction,Units,Date, Result) %>% 
+  distinct() %>% 
   group_by(Site,Parameter,Fraction,Units) %>% 
   mutate(Result=as.numeric(Result)) %>% 
   summarise("Record Count"=n(),mean=mean(Result,na.rm = TRUE),median=median(Result,na.rm = TRUE),
