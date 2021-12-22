@@ -266,7 +266,7 @@ analyte.short<-analyte.short %>%
   arrange(Analytical.Lab)
 
 #create table for the analyte list/precision method etc
-tl.1<-analyte.short %>% 
+analyte_final<-analyte.short %>% 
   rename("Analytical \nLab"=Analytical.Lab,
          "Method"=Standard.Method,
          "Calibration: \n Initial"=Cal.initial,

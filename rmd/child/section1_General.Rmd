@@ -26,7 +26,7 @@ This data report includes two sections: I) an overview of the sampling events de
 
 The `r params$study_name` site descriptions (Table \@ref(tab:sites-table)) and locations (Figure \@ref(fig:site-map)), and sampling dates (Table \@ref(tab:sites-dates)) are included below.
 
-```{r tab.id="sites-table",  echo=FALSE, message=FALSE, warning=FALSE, tab.cap="Sampling locations.",sep="."}
+```{r tab.id="sites-table",  echo=FALSE, message=FALSE, warning=FALSE, }
 
 library(dplyr)
 library(flextable)
@@ -41,6 +41,7 @@ library(flextable)
 #   width(j=c(3), width=0.6)%>%
 #   width(j=6, width=2.5)
 tl<-table.f(table1,2,max(ncol(table1)))
+tl<-flextable::set_caption(tl,caption="Sampling locations.",style="Table Caption",autonum = run_autonum(seq_id = "tab",prop=officer::fp_text_lite(bold = FALSE)))
 # tl<-fit_to_width(tl,7.5)
 tl
 ```
@@ -51,8 +52,9 @@ knitr::include_graphics(here::here(paste("data/map/",params$map_file,sep = "")))
   
 ```
 
-```{r tab.id="sites-dates",  echo=FALSE, message=FALSE, warning=FALSE, tab.cap="Sampling dates and overall parameters for the study period included in this report."}
+```{r tab.id="sites-dates",  echo=FALSE, message=FALSE, warning=FALSE }
 
 tl<-table.f(dates_all,2,max(ncol(dates_all)))
+tl<-set_caption(tl,caption = "Sampling dates and overall parameters for the study period included in this report.",style="Table Caption",autonum = run_autonum(seq_id = "tab",prop=officer::fp_text_lite(bold = FALSE)))
 tl
 ```
