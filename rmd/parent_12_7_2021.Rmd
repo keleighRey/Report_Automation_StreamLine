@@ -41,7 +41,7 @@ params:
 ---
 
 ```{r setup, include=FALSE,eval.expr=TRUE}
-knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(echo = FALSE, fig.cap = TRUE)
 library(officedown)
 library(officer)
 
@@ -51,11 +51,6 @@ fp <- fp_par(
   border.bottom = fp_border())
 
 fp_text(shading.color='#EFEFEF', bold = FALSE)
-knitr::opts_chunk$set(fp_text_lite(bold = FALSE))
-
-# knitr::opts_chunk$set(
-#   fig.cap,
-# )
 
 study_name=params$study_name
 tox=params$tox
@@ -76,12 +71,7 @@ map_file=params$map_file
 
 knitr::opts_chunk$set(tab.topcaption = TRUE)
 knitr::opts_chunk$set(fp_text_lite(bold = FALSE))
-knitr::opts_chunk$set(
-  fig.cap.style="Image Caption",
-  fig.cap = fp_text(fp_text_lite(bold = FALSE)),
-  align = "Center",
-  bold = FALSE
-)
+
   
 ```
 

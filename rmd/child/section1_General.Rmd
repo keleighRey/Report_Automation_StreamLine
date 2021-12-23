@@ -47,7 +47,8 @@ tl<-flextable::set_caption(tl,caption="Sampling locations.",style="Table Caption
 tl
 ```
 
-```{r site-map, echo=FALSE, fig.cap="Map of sampling locations. Site names reference the Location ID and River Mile.", fig.align='center',fig.cap.style="Image Caption",message=FALSE, warning=FALSE}
+```{r site-map, echo=FALSE, fig.cap="Map of sampling locations. Site names reference the Location ID and River Mile.",fig.align='center',fig.cap.style="Image Caption",message=FALSE, warning=FALSE,eval=TRUE}
+
 
 knitr::include_graphics(here::here(paste("data/map/",params$map_file,sep = "")))
   

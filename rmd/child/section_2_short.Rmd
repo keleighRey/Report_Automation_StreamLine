@@ -165,6 +165,7 @@ sites.l<-unique(sites$SITE_HISTORY_ID)
      temp$Parameter<-stringr::str_to_title(temp$Parameter)
      temp<-temp %>% 
     mutate(Parameter=case_when(Parameter=="Ph"~"pH",
+                               Parameter=="Dissolved_oxygen"~"Dissolved oxygen",
                                TRUE~paste(Parameter)),
            Units=case_when(Units=="ph units"~"pH units",
                            TRUE~paste(Units)))

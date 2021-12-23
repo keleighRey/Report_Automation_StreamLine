@@ -52,11 +52,13 @@ stay_calm_units<-stay_calm_units %>%
 stay_calm_units$units<-tolower(stay_calm_units$units)
 
 wqs_table<-wqs_violations$prep_data %>% 
-  select(class,parameter,fraction,units,narrative) %>% 
+  select(class,parameter,fraction,units,use,narrative) %>% 
+  mutate(use=stringr::str_to_sentence(use,locale = "en")) %>% 
   rename(Class=class,
          Parameter=parameter,
          Fraction=fraction,
          Units=units,
+         "Applicable Use"=use,
          "Standard Narrative"=narrative
          )
 
@@ -250,8 +252,8 @@ options(digits = 2)
 chem_export_2<-chem_export %>%
   select(Site,Parameter,Fraction,Units,Date, Result) %>% 
   distinct() %>% 
-  group_by(Site,Parameter,Fraction,Units) %>% 
   mutate(Result=as.numeric(Result)) %>% 
+  group_by(Site,Parameter,Fraction,Units) %>% 
   summarise("Record Count"=n(),mean=mean(Result,na.rm = TRUE),median=median(Result,na.rm = TRUE),
             max=max(Result,na.rm = TRUE),min=min(Result,na.rm = TRUE)) %>% 
   distinct()

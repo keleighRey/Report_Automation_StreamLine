@@ -159,7 +159,8 @@ raw_df<-raw_df %>%
   mutate(method_speciation=case_when(parameter=="ammonia"~"as N",
                                      parameter=="nitrate"~"as N",
                                      parameter=="nitrite"~"as N",
-                                     parameter=="nitrate_nitrite"~"as N"))
+                                     parameter=="nitrate_nitrite"~"as N",
+                                     TRUE~"none"))
 
 
 # Extract the package root with base R functions.

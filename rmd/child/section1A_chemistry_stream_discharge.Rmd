@@ -66,16 +66,17 @@ A total of `r n_distinct(chem.short$CHEM_PARAMETER_NAME)` lab-measured, and `r n
 library(dplyr)
 library(flextable)
 
-tl.1<-flextable(analyte_final) %>% 
-  font(i = NULL, j = NULL, fontname="Arial", part = "all") %>% 
-  theme_zebra() %>% 
-  fontsize(size = 8, part="all")%>%
-  autofit()
-tl.1<-align(tl.1, i = NULL, j =(2:10) , align = "center", part = "all")%>%
-  width(j=c(6:10), width = 0.8)%>%
-  width(j=3:5, width=0.6)%>%
-  width(j=1, width=1.2)
-tl.1<-flextable::set_caption(tl.1,caption=("Water chemistry analytes sampled as part of the Stream Assessment Survey. Table lists sampled analytes and analytical specifications."),style="Table Caption",autonum = run_autonum(seq_id = "tab",prop=officer::fp_text_lite(bold = FALSE)))
+# tl.1<-flextable(analyte_final) %>% 
+#   font(i = NULL, j = NULL, fontname="Arial", part = "all") %>% 
+#   theme_zebra() %>% 
+#   fontsize(size = 8, part="all")%>%
+#   autofit()
+# tl.1<-align(tl.1, i = NULL, j =(2:10) , align = "center", part = "all")%>%
+#   width(j=c(6:10), width = 0.8)%>%
+#   width(j=3:5, width=0.6)%>%
+#   width(j=1, width=1.2)
+ tl.1<-table.f(analyte_final,2,max(ncol(analyte_final)))
+tl.1<-flextable::set_caption(tl.1,caption=("Water chemistry analytes sampled as part of the Stream Assessment Survey. Table lists sampled analytes and analytical specifications."),style="Table Caption",autonum = officer::run_autonum(seq_id = "tab",prop=officer::fp_text_lite(bold = FALSE)))
 tl.1<-flextable::footnote(tl.1,ref_symbols =c("",""),part="header",value = as_paragraph(c("^ Precision objectives are defined by results of duplicate samples as described in SOP #102-20, and #110-21.","~ Not Applicable")))
 tl.1
 

@@ -69,11 +69,18 @@ chem_export<-chem_export %>%
 #stayCALM package
 chem_export<-chem_export %>% 
   mutate(value=case_when(parameter=="ammonia"~value*1000,
+                         parameter=="nitrite"~value*1000,
+                         parameter=="nitrate_nitrite"~value*1000,
+                         parameter=="nitrate"~value*1000,
                           TRUE~value)) %>% 
   mutate(units=case_when(parameter=="ammonia"~paste("ug/l"),
+                         parameter=="nitrite"~paste("ug/l"),
+                         parameter=="nitrate_nitrite"~paste("ug/l"),
+                         parameter=="nitrate"~paste("ug/l"),
                          TRUE~paste(units))) %>% 
   mutate(result=round(value,digits = 1))#this is to match the value on the stayCALM values
 #they round to 1 sig digit
+
 
 viol_small<-wqs_violations$violation_data %>% 
   select(seg_id,site_id,date,parameter, result,fraction, 
@@ -138,7 +145,8 @@ unit_conv<-pcode %>%
   distinct() %>%
   mutate(CHEM_PARAMETER_UNIT_NOSP=tolower(CHEM_PARAMETER_UNIT_NOSP))
 
-chem_export<-merge(chem_export,unit_conv,by.x="units",by.y="CHEM_PARAMETER_UNIT_NOSP")
+chem_export<-merge(chem_export,unit_conv,by.x="units",by.y="CHEM_PARAMETER_UNIT_NOSP",
+                   all.x = TRUE)
 chem_export<-chem_export %>% 
   distinct()
 
@@ -175,7 +183,7 @@ chem_export$Use<-stringr::str_to_title(chem_export$Use)
 
 chem_export<-chem_export %>% 
   mutate(Parameter=case_when(Parameter=="Ph"~"ph",
-                             Parameter=="Nitrate_nitrite"~"Nitrite (as N)",
+                             Parameter=="Nitrate_nitrite"~"Nitrate - nitrite",
                              Parameter=="Dissolved_oxygen"~"Dissolved Oxygen",
                              TRUE~paste(Parameter)))
 
