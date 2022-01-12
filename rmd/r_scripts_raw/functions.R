@@ -114,10 +114,10 @@ table.f<-function(df,x,y){
   library(flextable)
   tl<-flextable(df) %>% font(i = NULL, j = NULL, fontname="Arial", part = "all") %>% 
     theme_zebra()
-  tl<-align(tl, i = NULL, j =(x:y) , align = "center", part = "all")
   tl<-fontsize(tl,size = 8,part = "all")
   tl<-autofit(tl)
   tl<-set_table_properties(tl,layout="autofit")
+  tl<-align(tl, i = NULL, j =(x:y) , align = "center", part = "all")
   tl
 }
 ####################################################################################

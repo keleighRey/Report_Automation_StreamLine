@@ -20,15 +20,15 @@ output:
         style: Image Caption
         pre: 'Figure '
         sep: '. '
-        fp_text: !expr officer::fp_text_lite(bold = FALSE)
+        fp_text: '`officer::fp_text_lite(bold = FALSE)`'
 params:
     tox: FALSE
     bap: FALSE
     habitat: FALSE
-    study_name: "Halfway Creek"
-    year_input: 2017
-    intro_file_name: "halfway_intro.csv"
-    sites_file_name: "halfway_sites.csv"
+    study_name: "Birch Creek"
+    year_input: 2019
+    intro_file_name: "birch_intro.csv"
+    sites_file_name: "birch_sites.csv"
     grouping_for_chem: site
     grouping_for_bap: site
     map_zoom: 12
@@ -81,7 +81,7 @@ knitr::opts_chunk$set(fp_text_lite(bold = FALSE))
 year_input=params$year_input
 source(here::here("rmd/r_scripts_raw/stayCALM_exceedances_updated.R"))
 source(here::here("rmd/r_scripts_raw/functions.R"))
-source(here::here("rmd/r_scripts_raw/preprocessing_1_raw.R"))
+source(here::here("rmd/r_scripts_raw/preprocessing_1_raw_updated_1_11_21.R"))
 year.input=params$year_input
 source(here::here("rmd/r_scripts_raw/preprocessing_2_chemistry.R"))
 if (params$bap) {source(here::here("rmd/r_scripts_raw/preprocessing_3_bap.R"))}

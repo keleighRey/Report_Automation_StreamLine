@@ -183,7 +183,7 @@ chem_export$Use<-stringr::str_to_title(chem_export$Use)
 
 chem_export<-chem_export %>% 
   mutate(Parameter=case_when(Parameter=="Ph"~"ph",
-                             Parameter=="Nitrate_nitrite"~"Nitrate - nitrite",
+                             Parameter=="Nitrate_nitrite"~"Nitrate + nitrite",
                              Parameter=="Dissolved_oxygen"~"Dissolved Oxygen",
                              TRUE~paste(Parameter)))
 
@@ -230,7 +230,7 @@ data_package_name=sites_file_name
 
 data_package_name<-gsub(".csv","",data_package_name)
 
-if(params$data_package){
+if(data_package){
 
 # Export the file
 file.name=paste("outputs/",data_package_name,"_attachment_I.xlsx",sep = "")

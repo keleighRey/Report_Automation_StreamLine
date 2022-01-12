@@ -1,5 +1,6 @@
 #Preprocessing for STREAMS report
 #11/4/2020
+#updated 1/11/21 for reading in master files instead of changing names
 #Preprocessing 1 will limit SBU files to just the data that you want. 
 
 #start with a list of sites-just site ID for those that you want
@@ -13,104 +14,201 @@ sites<-read.csv(here::here("data",sites_file_name),stringsAsFactors = FALSE)
 #source("rmd/r_scripts_raw/functions.R")
 
 #read in the SBU tables
-#
-#put the list here name of the file-lapply(read.csv(filepath(csv in the iteration, store into the SBU object)))
-SBU.sites<-read.csv(paste("C:/Users/",user,"/New York State Office of Information Technology Services/SMAS - Streams Data Modernization/Cleaned Files/Final_Sites_ITS/Master_S_Site_v2_created_2021_12_07.csv",sep=""),
-                    fileEncoding="UTF-8-BOM")
-#SBU.sites<-readxl::read_excel(here::here("data/sites_master_for_fl.xlsx"))
-SBU.sites<-SBU.sites %>%
-  rename(SITE_WATER_QLTY_STANDARD=SITE_WQ_STANDARD)
-
-SBU.chem<-read.csv(paste("C:/Users/",user,"/New York State Office of Information Technology Services/SMAS - Streams Data Modernization/Cleaned Files/Final_Chemistry_ITS/MASTER_S_CHEM_HISTORY_RESULT_2021-05-03.csv",sep = ""),stringsAsFactors = FALSE)
-#SBU.chem<-read.csv(paste("C:/Users/",user,"/New York State Office of Information Technology Services/SMAS - Streams Data Modernization/Cleaned Files/Final_Chemistry_ITS/dodge_RESULT.csv",sep = ""),stringsAsFactors = FALSE)
-
-
+##############################################################################
 SBU.tox.sediment<-read.csv(paste("C:/Users/",user,"/New York State Office of Information Technology Services/SMAS - Streams Data Modernization/Cleaned Files/Final_Toxicity_ITS/MASTER_S_TOXICITY_SEDIMENT_RESULT.csv",sep = ""),stringsAsFactors = FALSE)
 
 SBU.tox.water<-read.csv(paste("C:/Users/",user,"/New York State Office of Information Technology Services/SMAS - Streams Data Modernization/Cleaned Files/Final_Toxicity_ITS/MASTER_S_TOXICITY_WATER_RESULT.csv",sep = ""),stringsAsFactors = FALSE)
 
-#SBU.userp<-readxl::read_excel(paste("C:/Users/",user,"/New York State Office of Information Technology Services/SMAS - Streams Data Modernization/Cleaned Files/Final_SBU_Field_ITS/20210608_S_User_Perception_Field_Data_all_fields.xlsx",sep = ""))
-#SBU.userp<-readxl::read_excel(here::here("data/Dodge_Creek_Field/c20210924_Dodge_Creek_2021_User_Perception.xlsx"))
-SBU.userp<-read.csv(paste("C:/Users/",user,"/New York State Office of Information Technology Services/SMAS - Streams Data Modernization/Cleaned Files/Final_SBU_Field_ITS/Master_S_User_Perception_Survey__v4_created_2021_12_31.csv",sep = ""),
-                    fileEncoding = "UTF-8-BOM")
-
-#SBU.habitat<-readxl::read_excel(paste("C:/Users/",user,"/New York State Office of Information Technology Services/SMAS - Streams Data Modernization/Cleaned Files/Final_SBU_Field_ITS/20210608_S_Habitat_field_all_fields.xlsx",sep = ""))
-#SBU.habitat<-readxl::read_excel(here::here("data/Dodge_Creek_Field/c20210924_Dodge_Creek_2021_Habitat_Survey.xlsx"))
-SBU.habitat<-read.csv(paste("C:/Users/",user,"/New York State Office of Information Technology Services/SMAS - Streams Data Modernization/Cleaned Files/Final_SBU_Field_ITS/Master_S_Habitat_field_all_fields_v1_created_2021_12_31.csv",sep = ""),
-                      fileEncoding = "UTF-8-BOM")
-
-
-SBU.metrics<-read.csv(paste("C:/Users/",user,"/New York State Office of Information Technology Services/SMAS - Streams Data Modernization/Cleaned Files/Final_Macro_ITS/metrics.with.all.fields.csv",sep=""),stringsAsFactors=FALSE)
-
-SBU.in.situ.chem<-read.csv(paste("C:/Users/",user,"/New York State Office of Information Technology Services/SMAS - Streams Data Modernization/Cleaned Files/Final_SBU_Field_ITS/Master_S_IN_SITU_WATER_CHEM_v4_Internal_Format_created_2021_12_07.csv",sep=""))
-#dodge<-read.csv(here::here("data/Dodge_Creek_Field/c20210924_Dodge_Creek_2021_In_situ.csv"))
-#SBU.in.situ.chem<-rbind(SBU.in.situ.chem,dodge)
-SBU.in.situ.chem[SBU.in.situ.chem==-9999]<-NA
-
-SBU.chem.sample<-read.csv(paste("C:/Users/",user,"/New York State Office of Information Technology Services/SMAS - Streams Data Modernization/Cleaned Files/Final_Chemistry_ITS/MASTER_S_CHEM_HISTORY_SAMPLE_2021-12-27.csv",sep=""),stringsAsFactors = FALSE)
-#SBU.chem.sample<-read.csv(paste("C:/Users/",user,"/New York State Office of Information Technology Services/SMAS - Streams Data Modernization/Cleaned Files/Final_Chemistry_ITS/dodge_sample.csv",sep=""),stringsAsFactors = FALSE)
-
-#SBU.chem.good<-read.csv(paste(file.path,"/sbu_chem_2001_2019_provis.csv",sep = ""))
-#SBU.field<-readxl::read_excel("C:/Users/kareynol/New York State Office of Information Technology Services/SMAS - Streams Data Modernization/Cleaned Files/Final_SBU_Field_ITS/20201019_S_SAMPLE_EVENT_INFO_all_fields.xlsx")
-
-#SBU.field<-readxl::read_excel(paste("C:/Users/",user,"/New York State Office of Information Technology Services/SMAS - Streams Data Modernization/Cleaned Files/Final_SBU_Field_ITS/20210607_S_Sample_Event_Info_field_all_fields.xlsx",sep=""))
-#SBU.field<-readxl::read_excel(here::here("data/Dodge_Creek_Field/c20210924_Dodge_Creek_2021_Sample_Event_Info_Survey.xlsx"))
-SBU.field<-read.csv(paste("C:/Users/",user,"/New York State Office of Information Technology Services/SMAS - Streams Data Modernization/Cleaned Files/Final_SBU_Field_ITS/Master_S_Sample_Event_Info_field_all_fields_v1_created_2021_12_31.csv",sep=""),
-                    fileEncoding = "UTF-8-BOM")
-
-#read in the analyte table
-
 analyte<-read.csv(paste(file.path,"/qaqc_analyte_table.csv",sep=""),stringsAsFactors = FALSE)
+#################################################################################
+#read in SBU data that is the "master" files
+library(dplyr)
+library(readxl)
 
-sbu.chem.all<-merge(SBU.chem,SBU.chem.sample,by.x=c("CHR_SYS_SAMPLE_CDE","CHR_SAMPLE_DEL_GRP"),
-                    by.y = c("CHS_SYS_SAMPLE_CDE","CHS_SAMPLE_DEL_GRP"))
-rm(SBU.chem,SBU.chem.sample)
+# read in sites and initialize sites list to include all sites 
+#read in data that have the "master" tag
+db_path<-paste("C:/Users/",params$user,"/New York State Office of Information Technology Services/SMAS - Streams Data Modernization",sep = "")
 
-#filter out the Equipement blanks and dupes
-sbu.chem.all<-sbu.chem.all %>% 
+sites_path <- file.path(
+  db_path,
+  "Cleaned Files",
+  "Final_Sites_ITS"
+)
+# Get the file paths for the filenames with the prefix "MASTER" and
+# extension CSV.
+sites_csv_list <- list.files(
+  path = sites_path,
+  pattern = "Master(.+?)csv",
+  full.names = TRUE
+)
+# Identify the appropriate name for each file path.
+sites_csv_names <- case_when(
+  grepl("Master_S_Site", sites_csv_list) ~ "SBU.sites",
+  TRUE ~ "ERROR"
+)
+# Assign easy to reference names to filepaths.
+names(sites_csv_list) <- sites_csv_names
+# Reading in macro data -------------------------------------------------
+## Loop through CSV list, import data, store in a list.
+sites_raw_list <- lapply(sites_csv_list, function(file_i) {
+  # Import data
+  read.csv(
+    file_i,
+    na.strings = c("", "NA"),
+    stringsAsFactors = FALSE,
+    fileEncoding = "UTF-8-BOM"
+  )})
+SBU.sites<-sites_raw_list$SBU.sites
+SBU.sites<-SBU.sites %>%
+  rename(SITE_WATER_QLTY_STANDARD=SITE_WQ_STANDARD)
+
+##########################################################
+#Chem
+chem_path <- file.path(
+  db_path,
+  "Cleaned Files",
+  "Final_Chemistry_ITS"
+)
+# Get the file paths for the filenames with the prefix "MASTER" and
+# extension CSV.
+chem_csv_list <- list.files(
+  path = chem_path,
+  pattern = "MASTER(.+?)csv",
+  full.names = TRUE
+)
+# Identify the appropriate name for each file path.
+chem_csv_names <- case_when(
+  grepl("RESULT", chem_csv_list) ~ "result",
+  grepl("SAMPLE", chem_csv_list) ~ "sample",
+  grepl("PARAMETER", chem_csv_list) ~ "pcode",
+  
+  TRUE ~ "ERROR"
+)
+# Assign easy to reference names to filepaths.
+names(chem_csv_list) <- chem_csv_names
+# Reading in chem data -------------------------------------------------
+## Loop through CSV list, import data, store in a list.
+chem_raw_list <- lapply(chem_csv_list, function(file_i) {
+  # Import data
+  read.csv(
+    file_i,
+    na.strings = c("", "NA"),
+    stringsAsFactors = FALSE
+  )})
+# Join chem Data ----------------------------------------------------------
+
+chem.all<-merge(chem_raw_list$result,chem_raw_list$sample,
+                by.x=c("CHR_SYS_SAMPLE_CDE","CHR_SAMPLE_DEL_GRP"),
+                by.y=c("CHS_SYS_SAMPLE_CDE","CHS_SAMPLE_DEL_GRP"))
+
+chem.all<-chem.all %>% 
   subset(CHS_DEC_SAMPLE_TYPE_CDE=="N") %>% 
   subset(CHS_SAMPLE_SOURCE=="Field") %>% 
   subset(!(CHR_RESULT_TYPE_CDE %in% "SUR"))
 
-
-#read in the pcode table
-pcode<-read.csv(paste("C:/Users/",user,"/New York State Office of Information Technology Services/SMAS - Streams Data Modernization/Cleaned Files/Final_Chemistry_ITS/MASTER_S_CHEM_PARAMETER_2021-05-03.csv",sep=""),
-                stringsAsFactors = FALSE)
-
-#merge with pcode tables to get the parameter names
-sbu.chem.all<-merge(sbu.chem.all,pcode,by.x="CHR_PCODE",by.y="CHEM_PARAMETER_PCODE") %>% 
-    filter(!(CHR_PCODE %in% c(110, 136, 139, 143, 145)))
-
 #change both to numeric
-pcode$pcode.num<-as.numeric(pcode$CHEM_PARAMETER_PCODE)
-SBU.in.situ.chem$pcode.num<-as.numeric(SBU.in.situ.chem$ISWC_CHEM_PARAMETER_PCODE_VALID)
+chem_raw_list$pcode$pcode.num<-as.numeric(chem_raw_list$pcode$CHEM_PARAMETER_PCODE)
+pcode<-chem_raw_list$pcode
+
+#merge pcode and chemistry
+sbu.chem.all<-merge(chem.all,chem_raw_list$pcode,by.x="CHR_PCODE",by.y="pcode.num",all.x = TRUE) %>% 
+  #filter out lab pH, lab temperature, and lab specific conductance
+  filter(!(CHR_PCODE %in% c(110, 136, 139, 143, 145)))
+
+#clean up\
+rm(chem.all)
+###################################################################################
+#field data
+field_path <- file.path(
+  db_path,
+  "Cleaned Files",
+  "Final_SBU_Field_ITS"
+)
+# Get the file paths for the filenames with the prefix "MASTER" and
+# extension CSV.
+field_csv_list <- list.files(
+  path = field_path,
+  pattern = "(.+?)csv",
+  full.names = TRUE
+)
+# Identify the appropriate name for each file path.
+field_csv_names <- case_when(
+  grepl("User_Perception", field_csv_list) ~ "userp",
+  grepl("Habitat", field_csv_list) ~ "habitat",
+  grepl("IN_SITU", field_csv_list) ~ "insitu",
+  grepl("Sample_Event", field_csv_list) ~ "sample_info",
+  TRUE ~ "ERROR"
+)
+# Assign easy to reference names to filepaths.
+names(field_csv_list) <- field_csv_names
+# Reading in macro data -------------------------------------------------
+## Loop through CSV list, import data, store in a list.
+field_raw_list <- lapply(field_csv_list, function(file_i) {
+  # Import data
+  read.csv(
+    file_i,
+    na.strings = c("", "NA"),
+    stringsAsFactors = FALSE,
+    fileEncoding = "UTF-8-BOM")})
+
+#merge insitu and pcode
+field_raw_list$insitu$pcode.num<-as.numeric(field_raw_list$insitu$ISWC_CHEM_PARAMETER_PCODE_VALID)
 
 #merge pcode and insitu
-SBU.in.situ.chem<-merge(SBU.in.situ.chem,pcode,by="pcode.num",all.x = TRUE)
-SBU.in.situ.chem$ISWC_RESULT<-as.numeric(SBU.in.situ.chem$ISWC_RESULT)
+field_raw_list$insitu<-merge(field_raw_list$insitu,chem_raw_list$pcode,by="pcode.num",all.x = TRUE)
 
-#write.csv(sbu.chem.all,"data/SBU_chem_all_fields.csv",row.names = FALSE)
+SBU.in.situ.chem<-field_raw_list$insitu
+SBU.habitat<-field_raw_list$habitat
+SBU.userp<-field_raw_list$userp
+SBU.field<-field_raw_list$sample_info
+################################################################################
 
-#create statewide metrics#################################################################
-#adding statewide stuff 
-#limit to just eh columns we need, this is just 2018-2019
-#sbu.chem.statewide<-sbu.chem.all %>% 
- # select(CHR_CHEMICAL_NAME,CHR_RESULT_VALUE,CHR_RESULT_UNIT,CHR_VALIDATOR_QUAL)
+db_path<-paste("C:/Users/",params$user,"/New York State Office of Information Technology Services/SMAS - Streams Data Modernization",sep = "")
 
+macro_path <- file.path(
+  db_path,
+  "Cleaned Files",
+  "Final_Macro_ITS"
+)
+# Get the file paths for the filenames with the prefix "MASTER" and
+# extension CSV.
+macro_csv_list <- list.files(
+  path = macro_path,
+  pattern = "MASTER(.+?)csv",
+  full.names = TRUE
+)
+# Identify the appropriate name for each file path.
+macro_csv_names <- case_when(
+  grepl("METRICS", macro_csv_list) ~ "metrics",
+  grepl("SPECIES_SAMP_INF", macro_csv_list) ~ "bug_method",
+  grepl("SPECIES_DATA_HISTORY",macro_csv_list)~"raw_bugs",
+  TRUE ~ "ERROR"
+)
+# Assign easy to reference names to filepaths.
+names(macro_csv_list) <- macro_csv_names
+# Reading in macro data -------------------------------------------------
+## Loop through CSV list, import data, store in a list.
+macro_raw_list <- lapply(macro_csv_list, function(file_i) {
+  # Import data
+  read.csv(
+    file_i,
+    na.strings = c("", "NA"),
+    stringsAsFactors = FALSE
+  )})
 
-#take out the ones that were flagged as rejected
-#sbu.chem.statewide<-sbu.chem.statewide %>% 
- # filter(CHR_VALIDATOR_QUAL!="R")
+# Join Macro Data ----------------------------------------------------------
+SBU.metrics <- merge(
+  x = macro_raw_list$metrics,
+  y = macro_raw_list$bug_method,
+  by.x = "MMDH_LINKED_ID_VALIDATOR",
+  by.y="MSSIH_LINKED_ID_VALIDATOR"
+)
 
-#summarize for statwide averages- CHEMISTRY
-#sbu.chem.statewide<-sbu.chem.statewide %>%
- # group_by(CHR_CHEMICAL_NAME) %>% 
-  #summarise_at(vars(CHR_RESULT_VALUE),
-   #            funs(mean(.,na.rm = TRUE),
-    #                sd(.,na.rm = TRUE),n=n(),
-     #               q95=quantile(CHR_RESULT_VALUE,.95,na.rm = TRUE),
-      #              q75=quantile(CHR_RESULT_VALUE,.75,na.rm = TRUE),
-       #             q25=quantile(CHR_RESULT_VALUE,.25,na.rm = TRUE)))
+############################################################################
+#clean up
+rm(field_raw_list,macro_csv_list,macro_raw_list)
+###############################################################
+#merge insitu
 
 #do it for the provisional data fromt eh qa/qc, this is back to 2001
 sbu.chem.statewide<-sbu.chem.all%>% 
