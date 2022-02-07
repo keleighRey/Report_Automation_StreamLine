@@ -23,6 +23,7 @@ knitr::opts_chunk$set(echo = FALSE)
 
 ```
 
+
 ```{r tab.id="sites_chem",results = 'asis',warning=FALSE, echo=FALSE,message=FALSE}
 
 sites<-sites.short %>% 
@@ -48,7 +49,7 @@ sites.l<-unique(sites$SITE_HISTORY_ID)
   site<-unique(site.loc.small$Site)
   
   pwl_small<-unique(site.loc.small$`PWL segment`)
-  site.loc.small<-sites[sites$SITE_HISTORY_ID %in% sites.l[i],]
+  #site.loc.small<-sites[sites$SITE_HISTORY_ID %in% sites.l[i],]
    
    
    cat("  \n\n###  ",paste(sites.l[i]), "| Waterbody Class:",stds_small,"| WI/PWL ID:",pwl_small)
@@ -94,10 +95,16 @@ sites.l<-unique(sites$SITE_HISTORY_ID)
   temp <-chemistry_section2[chemistry_section2$Site %in% sites.l[i], ]
   temp$Site<-NULL
   temp$Parameter<-stringr::str_to_title(temp$Parameter)
+  temp_high<-high[high$Site %in% sites.l[i], ]
 
-  
   if(max(temp$`Record Count`)<= 1){
     temp<-temp %>% 
+      select(-c(Median,Max,Min)) %>% 
+      rename(Result=Mean)
+  }
+  
+    if(max(temp_high$`Record Count`)<= 1){
+    temp_high<-temp_high %>% 
       select(-c(Median,Max,Min)) %>% 
       rename(Result=Mean)
   }
@@ -114,7 +121,20 @@ sites.l<-unique(sites$SITE_HISTORY_ID)
    cat("  \n")
    cat("<br><br>")
  }
-   
+
+if(nrow(temp_high)>0) {
+  label=paste("Chemistry Measurements at Event Flow (high flow):",sites.l[i])
+   tab.cap=paste(label)
+   tab1<-table.f(temp_high, 2,max(ncol(temp_high)))
+  #label=paste("Chemistry Measurements:",sites.l[i])
+  tab1<-flextable::set_caption(tab1,tab.cap,style="Table Caption",autonum = run_autonum(seq_id = "tab",prop=officer::fp_text_lite(bold = FALSE)))
+  flextable::fit_to_width(tab1,max_width = 3) 
+  flextable::flextable_to_rmd(tab1)
+   rm(temp_high)
+   cat("  \n")
+   cat("<br><br>")
+}  
+
    temp <-field[field$Site %in% sites.l[i], ]
    temp$Site<-NULL
    
