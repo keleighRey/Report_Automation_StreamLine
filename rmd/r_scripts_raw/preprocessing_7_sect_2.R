@@ -249,6 +249,56 @@ flow<-field.short %>%
 #chemistry; using the stayCALM
 options(digits = 2)
 
+#first filter out the high flow events
+high.trans<-chem.trans[chem.trans$high_flow_flag=="high",]
+high.not<-chem.no.trans %>% 
+  filter(high_flow_flag=="high")
+high<-rbind(high.trans,high.not)
+
+high<-high %>% 
+  select(CHS_EVENT_SMAS_HISTORY_ID,
+         CHEM_PARAMETER_NAME,
+         CHEM_PARAMETER_FRACTION,
+         CHEM_PARAMETER_UNIT,
+         CHS_EVENT_SMAS_SAMPLE_DATE,
+         CHR_RESULT_VALUE) %>% 
+  rename(Site=CHS_EVENT_SMAS_HISTORY_ID,
+         Parameter=CHEM_PARAMETER_NAME,
+         Fraction=CHEM_PARAMETER_FRACTION,
+         Units=CHEM_PARAMETER_UNIT,
+         Date=CHS_EVENT_SMAS_SAMPLE_DATE, 
+         Result=CHR_RESULT_VALUE) %>% 
+  distinct() %>% 
+  mutate(Result=as.numeric(Result)) %>% 
+  group_by(Site,Date,Parameter,Fraction,Units) %>% 
+  summarise("Record Count"=n(),mean=mean(Result,na.rm = TRUE),median=median(Result,na.rm = TRUE),
+            max=max(Result,na.rm = TRUE),min=min(Result,na.rm = TRUE)) %>% 
+  distinct()
+
+high<-high %>% 
+  mutate_if(is.numeric,round,3)
+
+high$mean<-as.character(high$mean)
+high$median<-as.character(high$median)
+high$max<-as.character(high$max)
+high$min<-as.character(high$min)
+
+#rename
+high<-high %>% 
+  select(Site,Date,Parameter,Units,Fraction,`Record Count`,mean,median,max,min) %>% 
+  rename(Mean=mean,
+         Median=median,
+         Max=max,
+         Min=min)
+
+high$Fraction<-stringr::str_to_sentence(high$Fraction)
+
+high_filter<-high %>% 
+  select(Date,Site) %>% 
+  distinct()
+
+chem_export<-anti_join(chem_export,high_filter)#this will limit the data to the baseflow events for the tables
+
 chem_export_2<-chem_export %>%
   select(Site,Parameter,Fraction,Units,Date, Result) %>% 
   distinct() %>% 
@@ -288,9 +338,10 @@ field<-chem_export_2 %>%
 
 field.params<-unique(field$Parameter)#filter the field parameters out of the chemistry tables
 
-chemistry_section2<-chem_export_2 %>% 
-    mutate(Parameter=tolower(Parameter)) %>% 
-  filter(!Parameter %in% field.params)
-
+#filter out the high flow events
 
 prepped<-wqs_violations$prep_data
+
+chemistry_section2<-chem_export_2 %>% 
+  mutate(Parameter=tolower(Parameter)) %>% 
+  filter(!Parameter %in% field.params) 
