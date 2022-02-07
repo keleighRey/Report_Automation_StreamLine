@@ -67,6 +67,7 @@ chem_export<-chem_export %>%
 #
 #have to change ammonia stuff to get it to merge here, since units are converted for the
 #stayCALM package
+options(scipen=999)
 chem_export<-chem_export %>% 
   mutate(value=case_when(parameter=="ammonia"~value*1000,
                          parameter=="nitrite"~value*1000,
@@ -85,7 +86,9 @@ chem_export<-chem_export %>%
 viol_small<-wqs_violations$violation_data %>% 
   select(seg_id,site_id,date,parameter, result,fraction, 
          units,use,statistic,threshold,attaining_wqs,sample_count) %>% 
-  tidyr::separate_rows(site_id,sep=";")
+  tidyr::separate_rows(site_id,sep=";") %>% 
+   mutate(result=round(result,digits = 1))
+  
 
 viol_small<-viol_small %>% 
   mutate(units=case_when(parameter=="ph"~paste("ph units"),
