@@ -125,13 +125,17 @@ table.f<-function(df,x,y){
 #chemistry Graphs
 # create graphing function for those that need to be log10 (ug/L or mg/l-so not weird ones)
 chem.graph.site <- function(df, na.rm = TRUE, ...){
+  df<-df %>% 
+    arrange(CHEM_PARAMETER_NAME)
+  
   df$CHEM_PARAMETER_NAME<-tolower(df$CHEM_PARAMETER_NAME)
-  label="Horizontal lines represent the 95th, 75th, and 25th percentiles of statewide data for each endpoint.Boxes represent the interquartile range (25th to 75th percentiles) of the data for each site, whiskers represent the IQR +/- 1.5 times the IQR and dots indicate potential outlier values, or those outside of the IQR +/- 1.5 times the IQR. Stars at the bottom of the graph indicate a violation of a WQS (if applicable). Axis are presented in log scale for comparison by site." 
-      
+
   sbu.chem.statewide$CHEM_PARAMETER_NAME<-tolower(sbu.chem.statewide$CHEM_PARAMETER_NAME)
   if(nrow(stars_site)>1){stars_site$chemical_name<-tolower(stars_site$chemical_name)}
   # create list of chmistry's in data to loop over 
+
   chem_list <- unique(df$CHEM_PARAMETER_NAME)
+  
   l<-length(chem_list)
   
   
@@ -150,6 +154,11 @@ chem.graph.site <- function(df, na.rm = TRUE, ...){
     temp.chem<-subset(df,df$CHEM_PARAMETER_NAME==chem_list[i])
     df.1<-subset(df, df$CHEM_PARAMETER_NAME==chem_list[i])
     
+    #mke high flow flags nicer vocab
+    df.1<-df.1 %>% 
+      mutate(high_flow_flag=case_when(high_flow_flag=="high"~ "High flow",
+                                      TRUE~"Base flow"))
+    
     #df.1$SITE_PWL_ID<-droplevels(df.1$SITE_PWL_ID)
     #y=tail(df.1$SITE_PWL_ID) #get the number of levels needed for each one
     
@@ -158,36 +167,37 @@ chem.graph.site <- function(df, na.rm = TRUE, ...){
     
     temp.n.per.site<-df.1 %>% 
       group_by(CHS_EVENT_SMAS_HISTORY_ID) %>% 
-      mutate(number=n())
+      summarise(number=n(),.groups="drop")
     
     # create plot for each PWL in df 
     plot <- 
       ggplot(df.1,
              aes(CHS_EVENT_SMAS_HISTORY_ID,CHR_RESULT_VALUE,color=group,drop=TRUE))
-      
-      if(max(temp.n.per.site$number)>2){
+    
+    if(max(temp.n.per.site$number)>2){
       plot<-plot+geom_boxplot()
-      label="Boxes represent the interquartile range (25th to 75th percentiles) of the data for each site, whiskers represent the IQR +/- 1.5 times the IQR and dots indicate potential outlier values, or those outside of the IQR +/- 1.5 times the IQR. Stars at the bottom of the graph indicate a violation of a WQS (if applicable). Axis are presented in log scale for comparison by site." 
-    
-        }
-      if(max(temp.n.per.site$number) <= 2){
-        plot<-plot+geom_point()
-         label="Stars at the bottom of the graph indicate a violation of a WQS (if applicable). Axis are presented in log scale for comparison by site." 
-    
-         }
-       
-          
-     # plot+geom_jitter(color=high_flow_flag.x)
-      # scale_shape_manual(name="PWL Segment ID",values = 0:max(l))+
       
-      plot<-plot+
-        theme(axis.text.x = element_text(angle = 60, hjust = 1))+
+
+      
+      label="Boxes represent the interquartile range (25th to 75th percentiles) of the data for each site, whiskers represent the IQR +/- 1.5 times the IQR and dots indicate potential outlier values, or those outside of the IQR +/- 1.5 times the IQR. Stars at the bottom of the graph indicate a violation of a WQS (if applicable). Axis are presented in log scale for comparison by site." 
+      
+    }
+    if(max(temp.n.per.site$number) <= 2){
+      plot<-plot+geom_point()
+      label="Stars at the bottom of the graph indicate a violation of a WQS (if applicable). Axis are presented in log scale for comparison by site." 
+      
+    }
+    
+    # scale_shape_manual(name="PWL Segment ID",values = 0:max(l))+
+    
+    plot<-plot+
+      theme(axis.text.x = element_text(angle = 60, hjust = 1))+
       scale_y_log10(paste(str_to_title(df.1$CHEM_PARAMETER_NAME[df.1$CHEM_PARAMETER_NAME==chem_list[i]]), df.1$CHEM_PARAMETER_UNIT[df.1$CHEM_PARAMETER_NAME==chem_list[i]])) + 
       xlab("Site ID")+
       # geom_hline(yintercept=temp.statewide$q95,color="grey53")+
       # geom_hline(yintercept=temp.statewide$q75,color="grey53")+
       # geom_hline(yintercept=temp.statewide$q25,color="grey53")+
-     scale_color_manual(breaks=names(group_colors),values=group_colors)+
+      scale_color_manual(breaks=names(group_colors),values=group_colors)+
       #scale_color_manual(values = group_colors,breaks = group_colors)+
       theme(legend.position="right",legend.title = element_blank()) +
       # #expand_limits(x=nlevels(y)+5)+
@@ -197,10 +207,23 @@ chem.graph.site <- function(df, na.rm = TRUE, ...){
       #theme(legend.title=element_blank(),legend.margin=margin(10,10,10,10),legend.key = element_rect(colour = NA, fill = NA),legend.background=element_blank())+
       coord_cartesian(clip = "off")
     
+
+  #look to see if there is high flow
+
+      #facet_wrap(~high_flow_flag,drop = TRUE)
+  
+    #white hex #ffffff
     
     if(nrow(stars)>=1){
       plot+annotate(geom = "text",label=paste("*"),x=temp.stars$site_id, y=(min(df.1$CHR_RESULT_VALUE[df.1$CHEM_PARAMETER_NAME==chem_list[i]]+100,na.rm=TRUE)),color="black")
-      }
+    }
+    
+    flows<-unique(df.1$high_flow_flag)
+    
+    if(stringr::str_detect(flows,"High flow")){
+      plot<-plot+geom_point(data=filter(df.1,high_flow_flag=="High flow"),color="yellow")
+    }
+    
     
     #geom_rect(aes(xmin = nlevels(y), xmax = nlevels(y)+5, ymin = log10(min(df$result_value[df$chemical_name==chem_list[i]])), ymax = log10(max(df$result_value[df$chemical_name==chem_list[i]]))),
     # fill = "white", alpha = 0.1)# print plots to screen
@@ -220,7 +243,10 @@ chem.graph.pwl <- function(df, na.rm = TRUE, ...){
  sbu.chem.statewide$CHEM_PARAMETER_NAME<-tolower(sbu.chem.statewide$CHEM_PARAMETER_NAME)
   
   # create list of chmistry's in data to loop over 
-  chem_list <- unique(df$CHEM_PARAMETER_NAME)
+   df<-df %>% 
+    arrange(CHEM_PARAMETER_NAME)
+   
+ chem_list <- unique(df$CHEM_PARAMETER_NAME)
   l<-length(chem_list)
   
   
@@ -265,8 +291,7 @@ chem.graph.pwl <- function(df, na.rm = TRUE, ...){
       # geom_hline(yintercept=temp.statewide$q25,color="grey53")+
        scale_color_manual(breaks=names(group_colors),values=group_colors)+
       geom_jitter(data=df.1 %>%filter(high_flow_flag=="high"),
-                       aes(SITE_PWL_ID,CHR_RESULT_VALUE),
-                       color="yellow")+
+                       aes(SITE_PWL_ID,CHR_RESULT_VALUE, color="yellow"))+
       # #expand_limits(x=nlevels(y)+5)+
       # annotate(geom="text", label=paste("95th",temp.statewide$q95,sep="-"),x=nlevels(y)+2, y=temp.statewide$q95, vjust=-1,color="grey61",size=3)+
       # annotate(geom="text", label=paste("75th",temp.statewide$q75,sep="-"), x=nlevels(y)+2, y=temp.statewide$q75, vjust=-1,color="grey61",size=3)+
@@ -282,7 +307,13 @@ chem.graph.pwl <- function(df, na.rm = TRUE, ...){
     #geom_rect(aes(xmin = nlevels(y), xmax = nlevels(y)+5, ymin = log10(min(df$result_value[df$chemical_name==chem_list[i]])), ymax = log10(max(df$result_value[df$chemical_name==chem_list[i]]))),
     # fill = "white", alpha = 0.1)# print plots to screen
     label="Boxes represent the interquartile range (25th to 75th percentiles) of the data for each site, whiskers represent the IQR +/- 1.5 times the IQR and dots indicate potential outlier values, or those outside of the IQR +/- 1.5 times the IQR. Stars at the bottom of the graph indicate a violation of a WQS (if applicable). Axis are presented in log scale for comparison by site." 
-      
+    
+    flows<-unique(df.1$high_flow_flag)
+    
+    if(stringr::str_detect(flows,"High flow")){
+      plot<-plot+geom_point(data=filter(df.1,high_flow_flag=="High flow"),color="yellow")
+    }
+    
     print(plot)
     cat('\n\n') 
     
@@ -298,6 +329,9 @@ chem.graph.continuous.site <- function(df, na.rm = TRUE, ...){
   sbu.chem.statewide$CHEM_PARAMETER_NAME<-tolower(sbu.chem.statewide$CHEM_PARAMETER_NAME)
   
   # create list of chmistry's in data to loop over 
+    df<-df %>% 
+    arrange(CHEM_PARAMETER_NAME)
+  
   chem_list <- unique(df$CHEM_PARAMETER_NAME)
   l<-length(chem_list)
   
@@ -352,6 +386,12 @@ chem.graph.continuous.site <- function(df, na.rm = TRUE, ...){
     
     if(nrow(stars)>=1){plot+annotate(geom = "text",label=paste("*"),x=temp.stars$PWL_segment, y=(min(df.1$CHR_RESULT_VALUE[df.1$CHEM_PARAMETER_NAME==chem_list[i]])-10),color="black")}
     
+     flows<-unique(df.1$high_flow_flag)
+     
+     if(stringr::str_detect(flows,"High flow")){
+       plot<-plot+geom_point(data=filter(df.1,high_flow_flag=="High flow"),color="yellow")
+     }
+     
     #geom_rect(aes(xmin = nlevels(y), xmax = nlevels(y)+5, ymin = log10(min(df$result_value[df$chemical_name==chem_list[i]])), ymax = log10(max(df$result_value[df$chemical_name==chem_list[i]]))),
     # fill = "white", alpha = 0.1)# print plots to screen
     print(plot)
@@ -371,7 +411,10 @@ chem.graph.continuous.pwl <- function(df, na.rm = TRUE, ...){
   sbu.chem.statewide$CHEM_PARAMETER_NAME<-tolower(sbu.chem.statewide$CHEM_PARAMETER_NAME)
   
   # create list of chmistry's in data to loop over 
-  chem_list <- unique(df$CHEM_PARAMETER_NAME)
+   df<-df %>% 
+    arrange(CHEM_PARAMETER_NAME)
+  
+   chem_list <- unique(df$CHEM_PARAMETER_NAME)
   l<-length(chem_list)
   
   
@@ -421,8 +464,12 @@ chem.graph.continuous.pwl <- function(df, na.rm = TRUE, ...){
       coord_cartesian(clip = "off")
     
     if(nrow(temp.stars)>=1){plot+annotate(geom = "text",label=paste("*"),x=temp.stars$PWL_segment, y=(min(df.1$CHR_RESULT_VALUE[df.1$CHEM_PARAMETER_NAME==chem_list[i]])-1),color="black")}
-    plot+ geom_jitter(data=df.1 %>%filter(high_flow_flag=="high"),color="yellow")
-      
+   
+    flows<-unique(df.1$high_flow_flag)
+    
+    if(stringr::str_detect(flows,"High flow")){
+      plot<-plot+geom_point(data=filter(df.1,high_flow_flag=="High flow"),color="yellow")
+    }
     
     #geom_rect(aes(xmin = nlevels(y), xmax = nlevels(y)+5, ymin = log10(min(df$result_value[df$chemical_name==chem_list[i]])), ymax = log10(max(df$result_value[df$chemical_name==chem_list[i]]))),
     # fill = "white", alpha = 0.1)# print plots to screen
@@ -442,7 +489,11 @@ chem.graph.continuous.site <- function(df, na.rm = TRUE, ...){
   sbu.chem.statewide$CHEM_PARAMETER_NAME<-tolower(sbu.chem.statewide$CHEM_PARAMETER_NAME)
   
   # create list of chmistry's in data to loop over 
-  chem_list <- unique(df$CHEM_PARAMETER_NAME)
+   df<-df %>% 
+    arrange(CHEM_PARAMETER_NAME)
+  
+   chem_list <- unique(df$CHEM_PARAMETER_NAME)
+  
   l<-length(chem_list)
   
   
@@ -470,10 +521,10 @@ chem.graph.continuous.site <- function(df, na.rm = TRUE, ...){
              aes(CHS_EVENT_SMAS_HISTORY_ID,CHR_RESULT_VALUE,color=group,drop=TRUE))
       
       if(nrow(df.1)>=3){plot<-plot+geom_boxplot()
-      label="Boxes represent the interquartile range (25th to 75th percentiles) of the data for each site, whiskers represent the IQR +/- 1.5 times the IQR and dots indicate potential outlier values, or those outside of the IQR +/- 1.5 times the IQR. Stars at the bottom of the graph indicate a violation of a WQS (if applicable). Axis are presented in log scale for comparison by site." 
+      label="Boxes represent the interquartile range (25th to 75th percentiles) of the data for each site, whiskers represent the IQR +/- 1.5 times the IQR and dots indicate potential outlier values, or those outside of the IQR +/- 1.5 times the IQR. Stars at the bottom of the graph indicate a violation of a WQS (if applicable). Axis are presented in log scale for comparison by site. Yellow dots (if included) indicate samples taken at event flow rates" 
      }
       if(nrow(df.1)<=2){plot<-plot+geom_point()
-           label="Stars at the bottom of the graph indicate a violation of a WQS (if applicable). Axis are presented in log scale for comparison by site.The total number of reported values illustrated for each sampling location can vary due to non-detection and QA/QC procedures. Descriptions of removed records are presented in Appendix IV."
+           label="Stars at the bottom of the graph indicate a violation of a WQS (if applicable). Axis are presented in log scale for comparison by site.The total number of reported values illustrated for each sampling location can vary due to non-detection and QA/QC procedures. Descriptions of removed records are presented in Appendix IV. Yellow dots (if included) indicate samples taken at event flow rates."
  }
       
       #scale_shape_manual(name="PWL Segment ID",values = 0:max(l))+
@@ -498,7 +549,14 @@ chem.graph.continuous.site <- function(df, na.rm = TRUE, ...){
     
     #geom_rect(aes(xmin = nlevels(y), xmax = nlevels(y)+5, ymin = log10(min(df$result_value[df$chemical_name==chem_list[i]])), ymax = log10(max(df$result_value[df$chemical_name==chem_list[i]]))),
     # fill = "white", alpha = 0.1)# print plots to screen
-    print(plot)
+     flows<-unique(df.1$high_flow_flag)
+     
+     if(stringr::str_detect(flows,"High flow")){
+       plot<-plot+geom_point(data=filter(df.1,high_flow_flag=="High flow"),color="yellow")
+     }
+     
+     
+     print(plot)
     cat('\n\n') 
     
   }
@@ -513,10 +571,12 @@ chem.graph.insitu.site <- function(df, na.rm = TRUE, ...){
   
   df$CHEM_PARAMETER_NAME<-tolower(df$CHEM_PARAMETER_NAME)
   
-  sbu.insitu.statewide$CHEM_PARAMETER_NAME<-tolower(sbu.insitu.statewide$CHEM_PARAMETER_NAME)
+  #sbu.insitu.statewide$CHEM_PARAMETER_NAME<-tolower(sbu.insitu.statewide$CHEM_PARAMETER_NAME)
   
   # create list of chmistry's in data to loop over 
-  df$CHEM_PARAMETER_NAME
+  df<-df %>% 
+    arrange(CHEM_PARAMETER_NAME)
+  
   chem_list.2 <- unique(df$CHEM_PARAMETER_NAME)
   
   
@@ -543,7 +603,7 @@ chem.graph.insitu.site <- function(df, na.rm = TRUE, ...){
     
     temp.n.per.site<-df.1 %>% 
     group_by(ISWC_EVENT_SMAS_HISTORY_ID) %>% 
-    mutate(number=n())
+    summarise(number=n(),.groups="drop")
     
     
     # create plot for each parameter with PWL in df 
@@ -551,12 +611,22 @@ chem.graph.insitu.site <- function(df, na.rm = TRUE, ...){
       ggplot(df.1,
              aes(ISWC_EVENT_SMAS_HISTORY_ID,ISWC_RESULT,color=group,drop=TRUE)) 
     
-      if(max(temp.n.per.site$number>2)){plot<-plot+geom_boxplot()
-         label="Horizontal lines represent the 95th, 75th, and 25th percentiles of statewide data for each endpoint.Boxes represent the interquartile range (25th to 75th percentiles) of the data for each site, whiskers represent the IQR +/- 1.5 times the IQR and dots indicate potential outlier values, or those outside of the IQR +/- 1.5 times the IQR. Stars at the bottom of the graph indicate a violation of a WQS (if applicable). Axis are presented in log scale for comparison by site." 
-     }
-    if(max(temp.n.per.site$number<=2)){plot<-plot+geom_point()
-               label="Horizontal lines represent the 95th, 75th, and 25th percentiles of statewide data for each endpoint. Stars at the bottom of the graph indicate a violation of a WQS (if applicable). Axis are presented in log scale for comparison by site.The total number of reported values illustrated for each sampling location can vary due to non-detection and QA/QC procedures. Descriptions of removed records are presented in Appendix IV."
- }
+   #  if(max(temp.n.per.site$number>2)){
+   # print("this will be a boxplot")}
+   #  
+   #  if(max(temp.n.per.site$number<2)){
+   #    print("this will be a pointt")}
+   #  
+    if(max(temp.n.per.site$number)< 2){plot<-plot+geom_point()
+    label="Horizontal lines represent the 95th, 75th, and 25th percentiles of statewide data for each endpoint. Stars at the bottom of the graph indicate a violation of a WQS (if applicable). Axis are presented in log scale for comparison by site.The total number of reported values illustrated for each sampling location can vary due to non-detection and QA/QC procedures. Descriptions of removed records are presented in Appendix IV. Yellow dots (if included) indicate samples taken at event flow rates"
+    }
+  
+    if(max(temp.n.per.site$number)>2){
+      plot<-plot+geom_boxplot()
+      label="Horizontal lines represent the 95th, 75th, and 25th percentiles of statewide data for each endpoint.Boxes represent the interquartile range (25th to 75th percentiles) of the data for each site, whiskers represent the IQR +/- 1.5 times the IQR and dots indicate potential outlier values, or those outside of the IQR +/- 1.5 times the IQR. Stars at the bottom of the graph indicate a violation of a WQS (if applicable). Axis are presented in log scale for comparison by site.Yellow dots (if included) indicate samples taken at event flow rates" 
+    }
+    
+    
      
       plot<-plot+
       theme_grey() +
@@ -575,10 +645,18 @@ chem.graph.insitu.site <- function(df, na.rm = TRUE, ...){
       theme(legend.title=element_blank(),legend.margin=margin(10,10,10,10),legend.key = element_rect(colour = NA, fill = NA),legend.background=element_blank())+
       coord_cartesian(clip = "off")
     
-    if(nrow(stars)>1){plot+annotate(geom = "text",label=paste("*"),x=temp.stars.i$PWL_segment, y=(min(df.1$ISWC_RESULT[df.1$CHEM_PARAMETER_NAME==chem_list.2[i]],na.rm = TRUE)-1),color="black")}
+    if(nrow(stars)>1){plot+annotate(geom = "text",label=paste("*"),
+                                    x=temp.stars.i$PWL_segment, 
+                                    y=(min(df.1$ISWC_RESULT[df.1$CHEM_PARAMETER_NAME==chem_list.2[i]],na.rm = TRUE)-0.1),
+                                    color="black")}
     
     
-    
+      flows<-unique(df.1$high_flow_flag)
+      
+      if(stringr::str_detect(flows,"High flow")){
+        plot<-plot+geom_point(data=filter(df.1,high_flow_flag=="High flow"),color="yellow")
+      }
+      
     # print plots to screen
     print(plot)
     
@@ -596,6 +674,10 @@ chem.graph.insitu.pwl <- function(df, na.rm = TRUE, ...){
   
   # create list of chmistry's in data to loop over 
   #df$CHEM_PARAMETER_NAME
+    df<-df %>% 
+    arrange(CHEM_PARAMETER_NAME)
+  
+  
   chem_list.2 <- unique(df$CHEM_PARAMETER_NAME)
   
   
@@ -654,9 +736,13 @@ chem.graph.insitu.pwl <- function(df, na.rm = TRUE, ...){
                                      x=temp.stars.i$PWL_segment, 
                                      y=(min(df.1$ISWC_RESULT[df.1$CHEM_PARAMETER_NAME==chem_list.2[i]],na.rm = TRUE)),
                     color="black")
-    plot+geom_jitter(data=df.1 %>%filter(high_flow_flag=="high"),color="yellow")
-      
+   
     
+    flows<-unique(df.1$high_flow_flag)
+    
+    if(stringr::str_detect(flows,"High flow")){
+      plot<-plot+geom_point(data=filter(df.1,high_flow_flag=="High flow"),color="yellow")
+    }
     
     
     # print plots to screen
