@@ -23,12 +23,12 @@ output:
         fp_text: '`officer::fp_text_lite(bold = FALSE)`'
 params:
     tox: FALSE
-    bap: FALSE
-    habitat: FALSE
-    study_name: "Birch Creek"
-    year_input: 2019
-    intro_file_name: "birch_intro.csv"
-    sites_file_name: "birch_sites.csv"
+    bap: TRUE
+    habitat: TRUE
+    study_name: "Finger Lakes Advanced Stream Monitoring"
+    year_input: 2017
+    intro_file_name: "intro.csv"
+    sites_file_name: "sites_fl_good.csv"
     grouping_for_chem: site
     grouping_for_bap: site
     map_zoom: 12
@@ -36,7 +36,7 @@ params:
     limit_to_nuts: TRUE
     data_package: FALSE
     lit_cited_file: "lit_cited.docx"
-    map_file: "birch_map.png"
+    map_file: "fl_map.png"
      
 ---
 
@@ -108,8 +108,8 @@ source(here::here("rmd/r_scripts_raw/preprocessing_7_sect_2.R"))
 
 # Section I: Overview
 
-```{r if(params$bap){child="child/section1B_BAP.Rmd"}}
-if(params$bap){cat("## Benthic Macroinvertebrate Community")}
+```{r child=if(params$bap)"child/section1B_BAP.Rmd"}}
+if(bap){cat("# Benthic Macroinvertebrate Community")}
 
 ```
 
@@ -118,8 +118,8 @@ if(params$bap){cat("## Benthic Macroinvertebrate Community")}
 
 ```
 
-```{r if(params$habitat){child="child/section1C_stream_reach_phys.Rmd"}}
-if(params$habitat){cat("## Stream Reach Physical Habitat Characteristics")}
+```{r child=if(params$habitat)"child/section1C_stream_reach_phys.Rmd"}}
+if(habitat){cat("# Stream Reach Physical Habitat Characteristics")}
 
 ```
 
