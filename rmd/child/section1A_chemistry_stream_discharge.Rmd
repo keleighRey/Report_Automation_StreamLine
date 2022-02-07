@@ -18,6 +18,11 @@ temp7<-temp7 %>%
                              TRUE~parameter))
 show_text_standards<-unique(temp7$parameter) 
 
+show_text_ex<-temp5 %>% 
+  select(Parameter,units) %>% 
+  distinct() %>% 
+  mutate(combo=paste(Parameter,units,sep = ","))
+
 ```
 
 DEC establishes water quality standards (WQS) and guidance values for many specific substances. Waters are classified for their best uses and WQS are set to protect those uses (6 NYCRR Part 703). The data presented below does not meet the minimum data requirements for a confirmed best use assessment^[Best use assessment confirmation is based on 1) whether data are core or supplemental indicators, 2) how many years of data are available, and 3) how many samples were collected. (CALM, 2021)] (CALM, 2021). For the best use assessment, please see [DEC Info Locator](https://gisservices.dec.ny.gov/gis/dil/) and factsheets^[ Compilation of the state’s Integrated Report and updates to WI/PWL ID factsheets occur during even (2022, 2024) years. Best use assessments and factsheets may not immediately reflect data generated in this report.] for individual WI/PWL ID segments (WI/PWL ID `r paste(unique(show_text_pwl),sep=",")`). 
@@ -36,7 +41,8 @@ if(limit_to_nuts){
              CHEM_PARAMETER_NAME=="Nitrogen, Nitrate (As N)"|
              CHEM_PARAMETER_NAME=="Nitrogen, Nitrite"|
              CHEM_PARAMETER_NAME=="Nitrogen, Total"|
-             CHEM_PARAMETER_NAME=="Phosphorus, Total (As P)")
+             CHEM_PARAMETER_NAME=="Phosphorus, Total (As P)"|
+               CHEM_PARAMETER_NAME=="Phosphorus, Dissolved Orthophosphate (As P)")
    
       in.situ.short$CHEM_PARAMETER_NAME<-stringr::str_to_title(in.situ.short$CHEM_PARAMETER_NAME)
       in.situ.short<-in.situ.short %>% 
@@ -47,7 +53,9 @@ if(limit_to_nuts){
     }
 ```
 
-A total of `r n_distinct(chem.short$CHEM_PARAMETER_NAME)` lab-measured, and `r n_distinct(in.situ.short$CHEM_PARAMETER_NAME)` in-situ water quality analytes were analyzed in this study. Out of the `r nrow(chem.short)` lab-measured records and `r nrow(in.situ.short)` in-situ water quality records, there were `r nrow(temp5)` excursions from established water quality standards (6 NYCRR Part 703). `r if(nrow(temp5 >1)){paste("There were excursions in",(unique(stars$Parameter)),".",sep=": ")}`
+A total of `r n_distinct(chem.short$CHEM_PARAMETER_NAME)` lab-measured, and `r n_distinct(in.situ.short$CHEM_PARAMETER_NAME)` in-situ water quality analytes were analyzed in this study. Out of the `r nrow(chem.short)` lab-measured records and `r nrow(in.situ.short)` in-situ water quality records, there were `r nrow(temp5)` excursions from established water quality standards (6 NYCRR Part 703). `r if(nrow(temp5 >1)){paste("There were excursions in")}`
+`r if(nrow(temp5 >1)){paste(unique(show_text_ex$combo),sep="; ")}` 
+  `r if(nrow(temp5 >1)){paste(".")}`
 
 `r if(grouping_for_chem=="PWL"){paste("Plots illustrating the range of analyte concentration values within each WI/PWL segments from both mainstem and tributaries, are included below.")}`
 `r if(grouping_for_chem=="site"){paste("Plots illustrating the range of analyte concentration values for each site are included below.")}` `r if(limit_to_nuts){paste("Analytes selected for presentation were subset to those of specific interest to the study and include nitrate, nitrate + nitrite (as N), nitrite (as N), total nitrogen, ammonia, total kjeldahl nitrogen (TKN), total phosphorus, and turbidity, and in-situ parameters: dissolved oxygen, temperature, pH, and specific conductance.")}` 
@@ -109,6 +117,8 @@ names(group_colors)<-c(groups)
 
 #group_colors<-c("downstream"= "tomato2", "upstream"= "springgreen4")#, "c"="deepskyblue2")
 #group_colors<-c("a"= "tomato2", "b"= "springgreen4", "c"="deepskyblue2")
+chem.trans<-chem.trans %>% 
+  arrange(CHEM_PARAMETER_NAME)
 ```
 
 
@@ -116,16 +126,16 @@ names(group_colors)<-c(groups)
   
 
 if(nrow(chem.trans)>1 & grouping_for_chem=="site"){
-     label="Stars at the bottom of the graph indicate an excursion of a WQS (if applicable). Axis are presented in log scale for comparison by site." 
 
-  chem.graph.site(chem.trans)
-    
-}
+    label="Stars at the bottom of the graph indicate a violation of a WQS (if applicable). Axis are presented in log scale for comparison.The total number of reported values illustrated for each sampling location can vary due to non-detection and QA/QC procedures. Descriptions of removed records are presented in Appendix IV. Yellow dots (if included) indicate samples taken at event flow rates."
+chem.graph.site(chem.trans)
+    }
 
 if(nrow(chem.trans)>1 & grouping_for_chem=="PWL"){
-  label="Boxes represent the interquartile range (25th to 75th percentiles) of the data for each site, whiskers represent the IQR +/- 1.5 times the IQR and dots indicate potential outlier values, or those outside of the IQR +/- 1.5 times the IQR. Stars at the bottom of the graph indicate an excursion of a WQS (if applicable). Axis are presented in log scale for comparison by site." 
+    label="Stars at the bottom of the graph indicate a violation of a WQS (if applicable). Axis are presented in log scale for comparison.The total number of reported values illustrated for each sampling location can vary due to non-detection and QA/QC procedures. Descriptions of removed records are presented in Appendix IV. Yellow dots (if included) indicate samples taken at event flow rates."
+ 
   chem.graph.pwl(chem.trans)
-  
+ 
 }
 
 
