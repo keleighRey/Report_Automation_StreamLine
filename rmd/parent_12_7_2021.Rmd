@@ -108,7 +108,7 @@ source(here::here("rmd/r_scripts_raw/preprocessing_7_sect_2.R"))
 
 # Section I: Overview
 
-```{r child=if(params$bap)"child/section1B_BAP.Rmd"}}
+```{r child=if(params$bap){"child/section1B_BAP.Rmd"}}
 if(bap){cat("# Benthic Macroinvertebrate Community")}
 
 ```
@@ -118,7 +118,7 @@ if(bap){cat("# Benthic Macroinvertebrate Community")}
 
 ```
 
-```{r child=if(params$habitat)"child/section1C_stream_reach_phys.Rmd"}}
+```{r child=if(params$habitat){"child/section1C_stream_reach_phys.Rmd"}}
 if(habitat){cat("# Stream Reach Physical Habitat Characteristics")}
 
 ```
