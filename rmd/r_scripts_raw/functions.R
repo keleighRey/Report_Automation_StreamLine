@@ -132,7 +132,7 @@ chem.graph.site <- function(df, na.rm = TRUE, ...){
 
   sbu.chem.statewide$CHEM_PARAMETER_NAME<-tolower(sbu.chem.statewide$CHEM_PARAMETER_NAME)
   if(nrow(stars_site)>1){stars_site$chemical_name<-tolower(stars_site$chemical_name)}
-  # create list of chmistry's in data to loop over 
+  # create list of chemistry's in data to loop over 
 
   chem_list <- unique(df$CHEM_PARAMETER_NAME)
   
@@ -215,15 +215,16 @@ chem.graph.site <- function(df, na.rm = TRUE, ...){
     #white hex #ffffff
     
     if(nrow(stars)>=1){
-      plot+annotate(geom = "text",label=paste("*"),x=temp.stars$site_id, y=(min(df.1$CHR_RESULT_VALUE[df.1$CHEM_PARAMETER_NAME==chem_list[i]]+100,na.rm=TRUE)),color="black")
+      plot+annotate(geom = "text",label=paste("*"),x=temp.stars$site_id, y=(min(df.1$CHR_RESULT_VALUE[df.1$CHEM_PARAMETER_NAME==chem_list[i]],na.rm=TRUE)),color="black")
     }
     
     flows<-unique(df.1$high_flow_flag)
     
     if(stringr::str_detect(flows,"High flow")){
-      plot<-plot+geom_point(data=filter(df.1,high_flow_flag=="High flow"),color="yellow")
+      plot<-plot+geom_point(data=filter(df.1,high_flow_flag=="High flow"),color="grey",size=1.5)+
+        geom_point(data=filter(df.1,high_flow_flag=="High flow"),color="yellow",size=1)
     }
-    
+  
     
     #geom_rect(aes(xmin = nlevels(y), xmax = nlevels(y)+5, ymin = log10(min(df$result_value[df$chemical_name==chem_list[i]])), ymax = log10(max(df$result_value[df$chemical_name==chem_list[i]]))),
     # fill = "white", alpha = 0.1)# print plots to screen
@@ -384,7 +385,7 @@ chem.graph.continuous.site <- function(df, na.rm = TRUE, ...){
       theme(legend.title=element_blank(),legend.margin=margin(10,10,10,10),legend.key = element_rect(colour = NA, fill = NA),legend.background=element_blank())+
       coord_cartesian(clip = "off")
     
-    if(nrow(stars)>=1){plot+annotate(geom = "text",label=paste("*"),x=temp.stars$PWL_segment, y=(min(df.1$CHR_RESULT_VALUE[df.1$CHEM_PARAMETER_NAME==chem_list[i]])-10),color="black")}
+    if(nrow(stars)>=1){plot+annotate(geom = "text",label=paste("*"),x=temp.stars$PWL_segment, y=(min(df.1$CHR_RESULT_VALUE[df.1$CHEM_PARAMETER_NAME==chem_list[i]])),color="black")}
     
      flows<-unique(df.1$high_flow_flag)
      
@@ -570,12 +571,18 @@ chem.graph.continuous.site <- function(df, na.rm = TRUE, ...){
 chem.graph.insitu.site <- function(df, na.rm = TRUE, ...){
   
   df$CHEM_PARAMETER_NAME<-tolower(df$CHEM_PARAMETER_NAME)
+  df<-df%>%
+    mutate(CHEM_PARAMETER_NAME=case_when(CHEM_PARAMETER_NAME=="ph"~"pH",
+                                         TRUE~CHEM_PARAMETER_NAME))
   
   #sbu.insitu.statewide$CHEM_PARAMETER_NAME<-tolower(sbu.insitu.statewide$CHEM_PARAMETER_NAME)
   
   # create list of chmistry's in data to loop over 
   df<-df %>% 
-    arrange(CHEM_PARAMETER_NAME)
+    arrange(CHEM_PARAMETER_NAME) %>% 
+    mutate(CHEM_PARAMETER_NAME=tolower(CHEM_PARAMETER_NAME)) %>% 
+    mutate(CHEM_PARAMETER_NAME=case_when(CHEM_PARAMETER_NAME=="ph"~"pH",
+                                         TRUE~CHEM_PARAMETER_NAME))
   
   chem_list.2 <- unique(df$CHEM_PARAMETER_NAME)
   
@@ -583,7 +590,8 @@ chem.graph.insitu.site <- function(df, na.rm = TRUE, ...){
   for (i in seq_along(chem_list.2)) { 
     
     #create dataframe for statewide
-    temp.insitu.sw<-subset(sbu.insitu.statewide,sbu.insitu.statewide$CHEM_PARAMETER_NAME==chem_list.2[i])
+    temp.insitu.sw<-subset(sbu.insitu.statewide,
+                           sbu.insitu.statewide$CHEM_PARAMETER_NAME==chem_list.2[i])
     
     #order by group
     df$order<-as.numeric(df$order)
@@ -592,7 +600,15 @@ chem.graph.insitu.site <- function(df, na.rm = TRUE, ...){
     df$ISWC_EVENT_SMAS_HISTORY_ID<-forcats::fct_reorder(df$ISWC_EVENT_SMAS_HISTORY_ID,df$order)
     
     
-    if(nrow(stars)>1){temp.stars.i<-subset(stars.insitu,stars$Parameter==chem_list.2[i])}
+    if(nrow(stars)>1){
+      stars.insitu_site$chemical_name<-tolower(stars.insitu_site$chemical_name)
+      stars.insitu_site<-stars.insitu_site%>%
+        mutate(chemical_name=tolower(chemical_name)) %>% 
+        mutate(chemical_name=case_when(chemical_name=="ph"~"pH",
+                                       TRUE~chemical_name))
+      temp.stars.i<-stars.insitu_site %>% 
+        filter(chemical_name==chem_list.2[i])
+    }
     df.1<-subset(df, df$CHEM_PARAMETER_NAME==chem_list.2[i])
     
     #df.1$SITE_PWL_ID<-droplevels(df.1$SITE_PWL_ID)#get rid of any PWL's that don't have data
@@ -645,8 +661,8 @@ chem.graph.insitu.site <- function(df, na.rm = TRUE, ...){
       theme(legend.title=element_blank(),legend.margin=margin(10,10,10,10),legend.key = element_rect(colour = NA, fill = NA),legend.background=element_blank())+
       coord_cartesian(clip = "off")
     
-    if(nrow(stars)>1){plot+annotate(geom = "text",label=paste("*"),
-                                    x=temp.stars.i$PWL_segment, 
+    if(nrow(stars)>1){plot<-plot+annotate(geom = "text",label=paste("*"),
+                                    x=temp.stars.i$site_id, 
                                     y=(min(df.1$ISWC_RESULT[df.1$CHEM_PARAMETER_NAME==chem_list.2[i]],na.rm = TRUE)-0.1),
                                     color="black")}
     
@@ -674,8 +690,11 @@ chem.graph.insitu.pwl <- function(df, na.rm = TRUE, ...){
   
   # create list of chmistry's in data to loop over 
   #df$CHEM_PARAMETER_NAME
-    df<-df %>% 
-    arrange(CHEM_PARAMETER_NAME)
+  df<-df %>% 
+    arrange(CHEM_PARAMETER_NAME) %>% 
+    mutate(CHEM_PARAMETER_NAME=tolower(CHEM_PARAMETER_NAME)) %>% 
+    mutate(CHEM_PARAMETER_NAME=case_when(CHEM_PARAMETER_NAME=="ph"~"pH",
+                                         TRUE~CHEM_PARAMETER_NAME))
   
   
   chem_list.2 <- unique(df$CHEM_PARAMETER_NAME)
@@ -697,6 +716,10 @@ chem.graph.insitu.pwl <- function(df, na.rm = TRUE, ...){
                                      levels=factor.levels,
                                      labels = factor.levels,
                                      exclude = TRUE)
+    stars.insitu$chemical_name<-tolower(stars.insitu$chemical_name)
+    stars.insitu<-stars.insitu %>% 
+      mutate(chemical_name=case_when(chemical_name=="ph"~"pH",
+                                     TRUE~chemical_name))
     
     if(nrow(stars.insitu)>=0){temp.stars.i<-subset(stars.insitu,stars.insitu$Parameter==chem_list.2[i])}
     df.1<-subset(df, df$CHEM_PARAMETER_NAME==chem_list.2[i])
