@@ -35,7 +35,8 @@ contact<-contact %>%
 #merge with PWL to get PWL
 contact<-merge(contact,pwl,by.x="Site",by.y="SITE_HISTORY_ID")
 contact<-contact %>% 
-  rename(PWL=SITE_PWL_ID)
+  rename(PWL=SITE_PWL_ID) %>% 
+  arrange(order)
 
 userp.short[userp.short == -9999] <- NA
 
@@ -59,7 +60,8 @@ Variables[Variables < 0] <- NA
 Variables<-merge(Variables,pwl,by.x="Site",by.y="SITE_HISTORY_ID")
 Variables<-Variables %>% 
   rename(PWL=SITE_PWL_ID) %>% 
-  relocate(PWL,.before=Site)
+  relocate(PWL,.before=Site) %>% 
+  arrange(order)
 
 Variables$group<-NULL
 Variables$order<-NULL
@@ -71,8 +73,8 @@ DominantP<-userp.short%>%
   group_by(UPFDH_EVENT_SMAS_HISTORY_ID, UPFDH_PRIMARY_VARIABLE)%>%
   count()%>%
   filter(n == max(n))%>%
-  summarize(Primary=paste0(UPFDH_PRIMARY_VARIABLE, collapse = ", "))# %>% 
- # order_sites(sites_table = sites, sites_site_col = "SITE_HISTORY_ID", df_site_col = "UPFDH_EVENT_SMAS_HISTORY_ID")
+  summarize(Primary=paste0(UPFDH_PRIMARY_VARIABLE, collapse = ", "))%>% 
+ order_sites(sites_table = sites, sites_site_col = "SITE_HISTORY_ID", df_site_col = "UPFDH_EVENT_SMAS_HISTORY_ID")
 
 
 DominantS<-userp.short%>%
@@ -82,12 +84,14 @@ DominantS<-userp.short%>%
   group_by(UPFDH_EVENT_SMAS_HISTORY_ID)%>%
   filter(n == max(n))%>%
   group_by(UPFDH_EVENT_SMAS_HISTORY_ID)%>%
-  summarize(Secondary=paste0(UPFDH_SECONDARY_VARIABLE, collapse=", "))
+  summarize(Secondary=paste0(UPFDH_SECONDARY_VARIABLE, collapse=", ")) %>% 
+  order_sites(sites_table = sites, sites_site_col = "SITE_HISTORY_ID", df_site_col = "UPFDH_EVENT_SMAS_HISTORY_ID")
 
-Dominant<-dplyr::left_join(DominantP, DominantS, by="UPFDH_EVENT_SMAS_HISTORY_ID")
+
+Dominant<-dplyr::left_join(DominantP, DominantS, by="SITE_ID")
 
 Dominant$UPFDH_PRIMARY_VARIABLE<-NULL
-Dominant<-Dominant %>% rename(Sites=UPFDH_EVENT_SMAS_HISTORY_ID)
+Dominant<-Dominant %>% rename(Sites=SITE_ID)
 
 Dominant<-merge(Dominant, pwl,by.x="Sites",by.y="SITE_HISTORY_ID")
 
@@ -99,13 +103,15 @@ Dominant$order<-NULL
 Dominant$Primary<-gsub("_"," ",Dominant$Primary)
 Dominant$Primary<-stringr::str_to_sentence(Dominant$Primary,locale="en")
 
-#Dominant<-order_sites(Dominant,sites_table=sites, sites_site_col = "SITE_HISTORY_ID", df_site_col = "UPFDH_EVENT_SMAS_HISTORY_ID")
+Dominant<-order_sites(Dominant,sites_table=sites, 
+                      sites_site_col = "SITE_HISTORY_ID", 
+                      df_site_col = "Sites")
 
 #get things for text
 slight.imp<-contact %>% 
   select(PWL,`Contact Type`,value) %>%
   group_by(PWL,`Contact Type`) %>% 
-  mutate(mean=mean(value)) %>% 
+  summarise(mean=mean(value)) %>% 
   filter(mean>=3) %>% 
   distinct()
 
