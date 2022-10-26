@@ -9,6 +9,9 @@ output:
 
 ```{r echo=FALSE,message=FALSE,warning=FALSE}
 
+contact<-contact %>% 
+  arrange(order)
+
 plot<-ggplot(contact, aes(x=Site, y=value, fill=`Contact Type`))+
   geom_bar(position="dodge", width=0.7, na.rm = TRUE, stat = "summary", fun= "mean")+
   ylab("Mean Observer Ranking")+
