@@ -59,8 +59,15 @@ sites_raw_list <- lapply(sites_csv_list, function(file_i) {
     fileEncoding = "UTF-8-BOM"
   )})
 SBU.sites<-sites_raw_list$SBU.sites
+
 SBU.sites<-SBU.sites %>%
   rename(SITE_WATER_QLTY_STANDARD=SITE_WQ_STANDARD)
+
+#__________________________________________________________________________
+##FOR FINGER LAKES DATA
+#SBU.sites<-readxl::read_excel(here::here("data/sites_master_for_fl.xlsx"))
+#__________________________________________________________________________
+
 
 ##########################################################
 #Chem
@@ -104,7 +111,10 @@ chem.all<-merge(chem_raw_list$result,chem_raw_list$sample,
 chem.all<-chem.all %>% 
   subset(CHS_DEC_SAMPLE_TYPE_CDE=="N") %>% 
   subset(CHS_SAMPLE_SOURCE=="Field") %>% 
-  subset(!(CHR_RESULT_TYPE_CDE %in% "SUR"))
+  subset(!(CHR_RESULT_TYPE_CDE %in% "SUR")) %>% 
+  subset(CHR_RESULT_TYPE_CDE %in% "TRG")
+
+
 
 #change both to numeric
 chem_raw_list$pcode$pcode.num<-as.numeric(chem_raw_list$pcode$CHEM_PARAMETER_PCODE)
@@ -249,8 +259,10 @@ sites.short<-merge(sites.short,sites,by.x="SITE_HISTORY_ID",by.y="SH_SITE_ID")
 chem.short<-filter.to.sites(sbu.chem.all,quo(CHS_EVENT_SMAS_HISTORY_ID))
 
 # #######fr Finger Lakes monitoring_______________________________________________________--
+
 # ext<-read.csv(here::here("data/Final_Advanced_MP_External_102221.csv"))
 # chem.short<-plyr::rbind.fill(chem.short, ext)
+
 # #_________________________________________________________________________________________--
 
 chem.short<-chem.short %>% 
@@ -274,6 +286,18 @@ field.short<-field.short %>%
 flow.flags<-field.short %>% 
   select(SEIH_EVENT_SMAS_HISTORY_ID,SEIH_EVENT_SMAS_SAMPLE_DATE,high_flow_flag) %>% 
   distinct()
+
+# #######fr Finger Lakes monitoring_______________________________________________________--
+# flow.flags.2<-ext %>% 
+#   select(CHS_EVENT_SMAS_HISTORY_ID,CHS_EVENT_SMAS_SAMPLE_DATE,high_flow_flag) %>% 
+#   rename(SEIH_EVENT_SMAS_HISTORY_ID=CHS_EVENT_SMAS_HISTORY_ID,
+#          SEIH_EVENT_SMAS_SAMPLE_DATE=CHS_EVENT_SMAS_SAMPLE_DATE)
+# 
+# flow.flags<-rbind(flow.flags,flow.flags.2)
+# flow.flags<-flow.flags %>% 
+#   distinct()
+# #######fr Finger Lakes monitoring_______________________________________________________--
+
 #we'll merge this with chemistry to flag the high flow 
 #correct the dates
 chem.short$CHS_EVENT_SMAS_SAMPLE_DATE<-as.Date(chem.short$CHS_EVENT_SMAS_SAMPLE_DATE,"%m/%d/%Y")
