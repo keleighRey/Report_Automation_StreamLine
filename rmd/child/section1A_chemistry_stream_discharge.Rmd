@@ -107,13 +107,15 @@ sites<-sites %>%
   arrange(order)
 
 #sites$group<-levels(with(sites,reorder(group,order)))
-sites$group<-forcats::fct_reorder(sites$group,sites$order)
+sites$group<-as.character(sites$group)
   
 groups<-as.character(unique(sites$group))
 
-group_colors <- setNames(RColorBrewer::brewer.pal(length(unique(sites$group)), "Set1"), levels(sites$group))
+group_colors <- setNames(RColorBrewer::brewer.pal(length(unique(sites$group)), "Set1"), levels(length(unique(sites$group))))
 
 names(group_colors)<-c(groups)
+
+group_colors <- group_colors[!is.na(names(group_colors))] 
 
 #group_colors<-c("downstream"= "tomato2", "upstream"= "springgreen4")#, "c"="deepskyblue2")
 #group_colors<-c("a"= "tomato2", "b"= "springgreen4", "c"="deepskyblue2")
@@ -127,12 +129,12 @@ chem.trans<-chem.trans %>%
 
 if(nrow(chem.trans)>1 & grouping_for_chem=="site"){
 
-    label="Stars at the bottom of the graph indicate a violation of a WQS (if applicable). Axis are presented in log scale for comparison.The total number of reported values illustrated for each sampling location can vary due to non-detection and QA/QC procedures. Descriptions of removed records are presented in Appendix IV. Yellow dots (if included) indicate samples taken at event flow rates."
+    label="Stars at the bottom of the graph indicate a violation of a WQS (if applicable). Axis are presented in log scale for comparison.The total number of reported values illustrated for each sampling location can vary due to non-detection and QA/QC procedures.Color corresponds to watershed group indicated in legend. Yellow dots (if included) indicate samples taken at event flow rates."
 chem.graph.site(chem.trans)
     }
 
 if(nrow(chem.trans)>1 & grouping_for_chem=="PWL"){
-    label="Stars at the bottom of the graph indicate a violation of a WQS (if applicable). Axis are presented in log scale for comparison.The total number of reported values illustrated for each sampling location can vary due to non-detection and QA/QC procedures. Descriptions of removed records are presented in Appendix IV. Yellow dots (if included) indicate samples taken at event flow rates."
+    label="Stars at the bottom of the graph indicate a violation of a WQS (if applicable). Axis are presented in log scale for comparison.The total number of reported values illustrated for each sampling location can vary due to non-detection and QA/QC procedures. Color corresponds to watershed group indicated in legend. Yellow dots (if included) indicate samples taken at event flow rates."
  
   chem.graph.pwl(chem.trans)
  
@@ -162,6 +164,8 @@ if (nrow(chem.no.trans)>0 & grouping_for_chem=="PWL"){
 
 #this one for the other values (no transformation of units-in situ data)
  
+
+
 if (nrow(in.situ.short)>0 & grouping_for_chem=="site"){
   chem.graph.insitu.site(in.situ.short)
 }
