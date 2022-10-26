@@ -73,11 +73,17 @@ chem_export<-chem_export %>%
                          parameter=="nitrite"~value*1000,
                          parameter=="nitrate_nitrite"~value*1000,
                          parameter=="nitrate"~value*1000,
+                         parameter=="nitrogen nitrate-nitrite"~value*1000,
+                         parameter=="nitrogen, kjeldahl, total"~value*1000,
+                         parameter=="nitrogen, total"~value*1000,
                           TRUE~value)) %>% 
   mutate(units=case_when(parameter=="ammonia"~paste("ug/l"),
                          parameter=="nitrite"~paste("ug/l"),
                          parameter=="nitrate_nitrite"~paste("ug/l"),
                          parameter=="nitrate"~paste("ug/l"),
+                         parameter=="nitrogen nitrate-nitrite"~paste("ug/l"),
+                         parameter=="nitrogen, kjeldahl, total"~paste("ug/l"),
+                         parameter=="nitrogen, total"~paste("ug/l"),
                          TRUE~paste(units))) %>% 
   mutate(result=round(value,digits = 1))#this is to match the value on the stayCALM values
 #they round to 1 sig digit
