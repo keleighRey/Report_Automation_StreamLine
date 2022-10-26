@@ -35,6 +35,8 @@ group_colors <- setNames(RColorBrewer::brewer.pal(length(unique(sites$group)), "
 
 names(group_colors)<-c(groups)
 
+group_colors <- group_colors[!is.na(names(group_colors))] 
+
 
 ```
  `r paste(show.text)` (Figure \@ref(fig:BAP)). `r paste(show.text2)`.
