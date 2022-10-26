@@ -43,7 +43,10 @@ chem_all<-chem_all %>%
 
 
 #get the ones that need to be transformed alone
-chem.trans<-subset(chem_all,chem_all$CHEM_PARAMETER_UNIT_NOSP=="mg/L"|chem_all$CHEM_PARAMETER_UNIT_NOSP=="ug/L")
+chem.trans<-subset(chem_all,chem_all$CHEM_PARAMETER_UNIT_NOSP=="mg/L"|
+                     chem_all$CHEM_PARAMETER_UNIT_NOSP=="ug/L"|
+                     chem_all$CHEM_PARAMETER_UNIT_NOSP=="NTU"|
+                     chem_all$CHEM_PARAMETER_UNIT=="FNU")
 chem.trans<-chem.trans %>% 
   arrange(order)
 
