@@ -14,6 +14,8 @@ Habitat model affinity (HMA) scores and resulting final physical habitat assessm
 
 ```{r tab.id="Habitat-table", echo=FALSE, message=FALSE,warning=FALSE}
 
+habit.hma<-habit.hma %>% 
+  arrange(order)
 
 #call the function
 tl<-table.f(habit.hma[,c(38,1,2:15,36,37)],2,17)
