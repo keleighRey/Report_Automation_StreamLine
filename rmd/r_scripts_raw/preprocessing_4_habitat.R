@@ -28,7 +28,9 @@ habitat.short<-habitat.short %>%
 #limit to time period specified
 
 habitat.short<-habitat.short %>% 
-  filter(year >= year.input)
+  filter(year >= year.input) %>% 
+  filter(year<=year_out)
+
 
 habitat.short<-merge(habitat.short,sites,by.y="SITE_HISTORY_ID",by.x="HFDH_EVENT_SMAS_HISTORY_ID")
 
@@ -41,9 +43,13 @@ habitat.short[4:16] <- sapply(habitat.short[4:16],as.numeric)
 
 habitat.short[habitat.short==-9999]<-NA
 
+habitat.short<-habitat.short %>% 
+  mutate(HFDH_GRADIENT=case_when(is.na(HFDH_GRADIENT)~"High",
+                                 TRUE~"Low"))
+
 #average all aspects by site
 habitat.df<-habitat.short%>%
-  group_by(HFDH_EVENT_SMAS_HISTORY_ID, HFDH_GRADIENT)%>%
+  group_by(HFDH_EVENT_SMAS_HISTORY_ID, HFDH_GRADIENT,HFDH_EVENT_SMAS_SAMPLE_DATE)%>%
   summarize(`Epi.\n Cover`=mean(HFDH_EPIFAUNAL_COVER, na.rm=TRUE),
             `Embed. \n Pool.`=mean(HFDH_EMBEDDEDNESS_POOLING, na.rm=TRUE),
             `Vel/Dep. \n Reg.`=mean(HFDH_VELOCITY_DEPTH_REGIME, na.rm=TRUE),
@@ -96,38 +102,38 @@ habit.hma<-habitat.df%>%
 habit.hma<-habit.hma%>%
   mutate(EpiCover.Low=case_when(
     `Epi.
- Cover`<=EpiCoverM~`Epi.
- Cover`,
- TRUE~EpiCoverM),
+    Cover`<=EpiCoverM~`Epi.
+    Cover`,
+    TRUE~EpiCoverM),
     Embed.Low=case_when(
       `Embed. 
- Pool.`<=EmbedM ~ `Embed. 
- Pool.`,
+      Pool.`<=EmbedM ~ `Embed. 
+      Pool.`,
       TRUE~EmbedM),
     VelDep.Low=case_when(
       `Vel/Dep. 
- Reg.`<=VelDepM ~ `Vel/Dep. 
- Reg.`,
+      Reg.`<=VelDepM ~ `Vel/Dep. 
+      Reg.`,
       TRUE~ VelDepM),
     SedDep.Low=case_when(
       `Sed. 
- Dep.`<=SedDepM ~ `Sed. 
- Dep.`,
+      Dep.`<=SedDepM ~ `Sed. 
+      Dep.`,
       TRUE~ SedDepM),
     Flow.Low=case_when(
       `Flow 
- Status`<=FlowM ~ `Flow 
- Status`,
+      Status`<=FlowM ~ `Flow 
+      Status`,
       TRUE ~ FlowM),
     Chan.Low=case_when(
       `Chan. 
- Alt`<=ChanM ~ `Chan. 
- Alt`,
+      Alt`<=ChanM ~ `Chan. 
+      Alt`,
       TRUE~ ChanM),
     Riffle.Low=case_when(
       `Rif. 
- Freq`<=RiffleM ~ `Rif. 
- Freq`,
+      Freq`<=RiffleM ~ `Rif. 
+      Freq`,
       TRUE ~ RiffleM),
     Stability.Low=case_when(
       (`L.B. \n Stability`+ `R.B. \n Stability`)<=StabilityM ~ (`L.B. \n Stability`+ `R.B. \n Stability`),

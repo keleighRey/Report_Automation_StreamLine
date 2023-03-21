@@ -16,7 +16,7 @@ temp7<-temp7 %>%
   mutate(parameter=case_when(parameter=="ph"~"pH",
                              parameter=="dissolved_oxygen"~"dissolved oxygen",
                              TRUE~parameter))
-show_text_standards<-unique(temp7$parameter) 
+show_text_standards<-unique(temp7$parameter)
 
 show_text_ex<-temp5 %>% 
   select(Parameter,units) %>% 
@@ -131,6 +131,7 @@ if(nrow(chem.trans)>1 & grouping_for_chem=="site"){
 
     label="Stars at the bottom of the graph indicate a violation of a WQS (if applicable). Axis are presented in log scale for comparison.The total number of reported values illustrated for each sampling location can vary due to non-detection and QA/QC procedures.Color corresponds to watershed group indicated in legend. Yellow dots (if included) indicate samples taken at event flow rates."
 chem.graph.site(chem.trans)
+#chem.graph.continuous.site(chem.trans)
     }
 
 if(nrow(chem.trans)>1 & grouping_for_chem=="PWL"){
@@ -150,12 +151,15 @@ if(nrow(chem.trans)>1 & grouping_for_chem=="PWL"){
  
 if (nrow(chem.no.trans)>0 & grouping_for_chem=="site"){
   chem.graph.continuous.site(chem.no.trans)
+  chem.graph.continuous.site(chem.trans)
 }
 
 
 if (nrow(chem.no.trans)>0 & grouping_for_chem=="PWL"){
   chem.graph.continuous.pwl(chem.no.trans)
 }
+
+
 ```
 
 

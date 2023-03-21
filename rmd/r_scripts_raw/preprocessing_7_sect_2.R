@@ -221,6 +221,7 @@ wqs_table<-wqs_table %>%
 #summary for the BAP
 if(bap){
 bap.df<-metrics.short %>% 
+  mutate(year=format(as.Date(MSSIH_EVENT_SMAS_SAMPLE_DATE,"%m/%d/%Y"),"%Y")) %>% 
   select(MSSIH_EVENT_SMAS_HISTORY_ID,MSSIH_EVENT_SMAS_SAMPLE_DATE,MMDH_BIO_ASMT_PROFILE_SCORE,year) %>% 
   rename(DATE=MSSIH_EVENT_SMAS_SAMPLE_DATE) %>% 
   subset(year>=year.input) %>% 

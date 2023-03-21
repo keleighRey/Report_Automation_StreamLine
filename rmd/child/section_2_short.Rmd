@@ -15,9 +15,10 @@ knitr::opts_chunk$set(echo = FALSE)
 #library(dplyr)
 
 #source(here::here("rmd/r_scripts_raw/preprocessing_7_sect_2.R"))
-
+#source(here::here("rmd/r_scripts_raw/appendices_and_data_package.R"))
+#source(here::here("rmd/r_scripts_raw/preprocessing_7_sect_2.R"))
 #disable the scientific notation 
-#options(scipen=99)
+options(scipen=99)
 
 
 
@@ -32,17 +33,29 @@ sites$order<-as.numeric(sites$order)
 #sites$SITE_HISTORY_ID<-fct_reorder(sites$SITE_HISTORY_ID,sites$order)
 
 sites.l<-unique(sites$SITE_HISTORY_ID)
-#add the sites for the FL
-#sites.add<-unique(ext$CHS_EVENT_SMAS_HISTORY_ID)
-#sites.l<-merge(sites.add,sites.l)
+
+
+
+#add the sites for the FL------------------------------------------------------------------
+ext<-ext %>% 
+  filter(CHS_EVENT_SMAS_HISTORY_ID!="07-OWAL_T16-0.4")
+
+ sites.add<-unique(ext$CHS_EVENT_SMAS_HISTORY_ID)
+ sites.l<-merge(sites.add,sites.l)
+ sites.l<-unique(sites$SITE_HISTORY_ID)
+#take out the one that dosen't have chemistry
+
+#add the sites for the FL------------------------------------------------------------------
+
 
  for (i in seq_along(sites.l)) { 
-    #print(i)
+   # print(i)
   pwl_sc<-chem_export %>%
     select(`PWL segment`,Class,Site) %>% 
     distinct()#use the stayCALM seg ID to limit to class, might need to update, this is only looking at those that went through stayCALM
   
   site.loc.small<-pwl_sc[pwl_sc$Site %in% sites.l[i],]
+  #site.loc.small<-pwl_sc[pwl_sc$Site %in% i,] #for trouble shooting
    
   stds_small<-unique(site.loc.small$Class)
   stds_small<-toupper(stds_small)
@@ -64,6 +77,8 @@ sites.l<-unique(sites$SITE_HISTORY_ID)
     distinct()
   
   list.params<-raw_df_export[raw_df_export$site_id %in% sites.l[i],]
+   #list.params<-raw_df_export[raw_df_export$site_id %in% i,] # for trouble shooting
+  
   list.params$parameter<-stringr::str_to_title(list.params$parameter)
   
   list.params.l<-unique(list.params$parameter)
@@ -93,6 +108,8 @@ sites.l<-unique(sites$SITE_HISTORY_ID)
    cat("<br><br>")
   
   temp <-chemistry_section2[chemistry_section2$Site %in% sites.l[i], ]
+  # temp <-chemistry_section2[chemistry_section2$Site %in% i, ] #for trouble shooting
+  
   temp$Site<-NULL
   temp$Parameter<-stringr::str_to_title(temp$Parameter)
   temp_high<-high[high$Site %in% sites.l[i], ]
@@ -141,7 +158,9 @@ if(nrow(temp_high)>0) {
      if(max(temp$`Record Count`)<= 1){
     temp<-temp %>% 
       select(-c(Median,Max,Min)) %>% 
-      rename(Result=Mean)
+      rename(Result=Mean) %>% 
+      mutate(Fraction=case_when(is.na(Fraction)~"",
+                                TRUE~Fraction))
      }
    
   temp$Parameter<-stringr::str_to_title(temp$Parameter)
@@ -193,11 +212,13 @@ if(nrow(temp_high)>0) {
      tab3<-table.f(temp,2,4)
    label=paste("Water Quality Standard Excursions:",sites.l[i])
    tab.cap=paste(label)
-   tab3<-flextable::set_caption(tab3,tab.cap,style="Table Caption",autonum = run_autonum(seq_id = "tab",prop=officer::fp_text_lite(bold = FALSE)))
+   tab3<-flextable::set_caption(tab3,tab.cap,
+                                style="Table Caption",
+                                autonum = run_autonum(seq_id = "tab",
+                                                      prop=officer::fp_text_lite(bold = FALSE)))
    flextable::fit_to_width(tab3,max_width = 3) 
-   flextable::flextable_to_rmd(tab3)}
-   else{
-       cat("  \n\n *Water Quality Standard Excursions*")
+   flextable::flextable_to_rmd(tab3)} else{
+      cat("  \n\n *Water Quality Standard Excursions*")
      cat("  \n\n There were no water quality standard excursions at this site during the sampling period.")
    }
    rm(temp)
@@ -228,6 +249,8 @@ if(nrow(temp_high)>0) {
   }
   
   temp<-flow[flow$SEIH_EVENT_SMAS_HISTORY_ID%in% sites.l[i], ]
+  temp<-temp %>% 
+    dplyr::filter(SEIH_TOTAL_DISCH>0)
   if (nrow(temp) > 0) {
     library(ggplot2)
     tab5<-ggplot(temp,aes(SEIH_EVENT_SMAS_SAMPLE_DATE,SEIH_TOTAL_DISCH)) +

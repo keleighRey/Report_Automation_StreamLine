@@ -26,7 +26,9 @@ chem.short<-chem.short %>%
 #merge them both to get the PWL ids
 chem.short<-merge(chem.short,pwl, by.x="CHS_EVENT_SMAS_HISTORY_ID",by.y="SITE_HISTORY_ID")
 
+
 in.situ.short<-merge(in.situ.short,pwl, by.x="ISWC_EVENT_SMAS_HISTORY_ID",by.y="SITE_HISTORY_ID")
+
 
 #read in the colnames change 
 colnames_ref<-read.csv(here::here("data/col_names/stayCALM_colnames.csv"),stringsAsFactors = FALSE)

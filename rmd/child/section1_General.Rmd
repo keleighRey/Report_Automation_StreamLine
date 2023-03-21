@@ -55,6 +55,7 @@ knitr::include_graphics(here::here(paste("data/map/",params$map_file,sep = "")))
 ```
 
 ```{r tab.id="sites-dates",  echo=FALSE, message=FALSE, warning=FALSE }
+#dates_all<-read.csv(here::here("data/fl_sampler_table.csv"))
 
 tl<-table.f(dates_all,2,max(ncol(dates_all)))
 tl<-set_caption(tl,caption = "Sampling dates and overall parameters for the study period included in this report.",style="Table Caption",autonum = run_autonum(seq_id = "tab",prop=officer::fp_text_lite(bold = FALSE)))

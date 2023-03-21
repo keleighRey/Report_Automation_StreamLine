@@ -1,0 +1,596 @@
+---
+date: "`r Sys.Date()`"
+author: "NYSDEC SMAS"
+title: "Summary Report-Assessment"
+output:
+  html_document:
+    fig_caption: true
+    sep: '. '
+params:
+    tox: FALSE
+    bap: TRUE
+    habitat: TRUE
+    study_name: "Dodge Creek at Portville, NY"
+    year_input: 2021
+    intro_file_name: "dodge_intro.csv"
+    sites_file_name: "dodge_sites.csv"
+    grouping_for_chem: site
+    grouping_for_bap: site
+    map_zoom: 15
+    user: kareynol
+    limit_to_nuts: TRUE
+    data_package: FALSE
+    map_file: "fl_map.png" 
+    lit_cited_file: "lit_cited.docx"
+---
+
+
+```{r setup, include=FALSE,eval.expr=TRUE}
+knitr::opts_chunk$set(echo = FALSE, fig.cap = TRUE)
+library(officedown)
+library(officer)
+
+
+fp <- fp_par(
+  text.align = "center", 
+  padding.bottom = 20, padding.top = 120, 
+  border.bottom = fp_border())
+
+fp_text(shading.color='#EFEFEF', bold = FALSE)
+
+study_name=params$study_name
+tox=params$tox
+bap=params$bap
+habitat=params$habitat
+intro_file_name=params$intro_file_name
+sites_file_name=params$sites_file_name
+year.input=params$year_input
+#updated_sites_file_name=params$updated_sites_file_name
+grouping_for_bap=params$grouping_for_bap
+grouping_for_chem=params$grouping_for_chem
+map_zoom=params$map_zoom
+user=params$user
+limit_to_nuts=params$limit_to_nuts
+data_package=params$data_package
+lit_cited_file=params$lit_cited_file
+map_file=params$map_file
+
+knitr::opts_chunk$set(tab.topcaption = TRUE)
+knitr::opts_chunk$set(fp_text_lite(bold = FALSE))
+
+  
+```
+
+
+```{r message=FALSE,warning=FALSE,echo=FALSE}
+
+year_input=params$year_input
+source(here::here("rmd/r_scripts_raw/stayCALM_exceedances_updated.R"))
+source(here::here("rmd/r_scripts_raw/functions.R"))
+source(here::here("rmd/r_scripts_raw/preprocessing_1_raw_updated_1_11_21.R"))
+year.input=params$year_input
+source(here::here("rmd/r_scripts_raw/preprocessing_2_chemistry.R"))
+if (params$bap) {source(here::here("rmd/r_scripts_raw/preprocessing_3_bap.R"))}
+if (params$habitat) {source(here::here("rmd/r_scripts_raw/preprocessing_4_habitat.R"))}
+source(here::here("rmd/r_scripts_raw/preprocessing_5_user_perception.R"))
+source(here::here("rmd/r_scripts_raw/preprocessing_6_tox.R"))
+source(here::here("rmd/r_scripts_raw/appendices_and_data_package.R"))
+source(here::here("rmd/r_scripts_raw/preprocessing_7_sect_2.R"))
+
+#updating the table function
+table.f<-function(df,x,y){
+  library(flextable)
+  tl<-flextable(df) %>% font(i = NULL, j = NULL, fontname="Arial", part = "all") %>% 
+    theme_zebra()
+  tl<-fontsize(tl,size = 8,part = "all")
+  tl<-autofit(tl)
+  #tl<-set_table_properties(tl,layout="autofit")
+  tl<-align(tl, i = NULL, j =(x:y) , align = "center", part = "all")
+  tl
+}
+
+
+```
+
+`r paste(#params$study_name)`
+
+# Executive Summary {.tabset}
+
+`r paste(intro$intro)`
+
+The Steam Monitoring and Assessment Section (SMAS) conducted targeted stream monitoring that included:
+
+`r if(bap){paste("*  Benthic Macroinvertebrate Community Analysis")}`
+-   Water Quality Measurements
+`r if(habitat){paste("*  Stream Reach Physical Habitat Characteristics")}`
+-   Observer Ranking of Recreational Ability
+`r if(tox){paste("* Sediment and Porewater Microtox Analysis")}`
+
+This data report includes an overview of the sampling events described above, `r if(grouping_for_chem=="PWL"){paste("with results aggregated by WI/PWL segment,")}` a site-specific data summary to present all major findings for each site.
+
+Intended users of the data include : 
+
+Data for this project can be found at : 
+
+## Site Information
+
+```{r tab.id="sites-table",  echo=FALSE, message=FALSE, warning=FALSE, }
+
+library(dplyr)
+library(flextable)
+# tl<-flextable(table1) %>% font(i = NULL, j = NULL, fontname="Arial", part = "all") %>% theme_zebra() %>% autofit()
+# tl<-align(tl, i = NULL, j =(2:5) , align = "center", part = "all")%>%
+#   fontsize(size=8, part = "all")%>%
+#   fontsize(j=6, size=7)%>%
+#   width(j=c(1), width=1)%>%
+#   width(j=c(5), width=0.8)%>%
+#   width(j=c(4,7,8), width=0.6)%>%
+#   width(j=c(2), width=0.7)%>%
+#   width(j=c(3), width=0.6)%>%
+#   width(j=6, width=2.5)
+tl<-table.f(table1,2,max(ncol(table1)))
+tl<-flextable::set_caption(tl,caption="Sampling locations.",style="Table Caption",autonum = officer::run_autonum(seq_id = "tab",prop=officer::fp_text_lite(bold = FALSE)))
+tl<-flextable::border_outer(tl, part = "all")
+# tl<-fit_to_width(tl,7.5)
+tl
+```
+
+
+
+```{r tab.id="sites-dates",  echo=FALSE, message=FALSE, warning=FALSE }
+#dates_all<-read.csv(here::here("data/fl_sampler_table.csv"))
+
+tl<-table.f(dates_all,2,max(ncol(dates_all)))
+tl<-set_caption(tl,caption = "Sampling dates and overall parameters for the study period included in this report.",style="Table Caption",autonum = run_autonum(seq_id = "tab",prop=officer::fp_text_lite(bold = FALSE)))
+tl<-flextable::border_outer(tl, part = "all")
+tl
+```
+
+
+```{r site-map, echo=FALSE, fig.cap="Map of sampling locations. Site names reference the Location ID and River Mile.",fig.align='center',fig.cap.style="Image Caption",message=FALSE, warning=FALSE,eval=TRUE}
+
+
+knitr::include_graphics(here::here(paste("data/map/",params$map_file,sep = "")))
+  
+```
+
+## Water Chemistry Collection
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+#get segments and other text for below
+show_text_pwl<-unique(sites$SITE_PWL_ID)
+
+temp7<-temp6
+temp7<-temp7 %>% 
+  mutate(parameter=case_when(parameter=="ph"~"pH",
+                             parameter=="dissolved_oxygen"~"dissolved oxygen",
+                             TRUE~parameter))
+show_text_standards<-unique(temp7$parameter)
+
+show_text_ex<-temp5 %>% 
+  select(Parameter,units) %>% 
+  distinct() %>% 
+  mutate(combo=paste(Parameter,units,sep = ","))
+
+```
+
+DEC establishes water quality standards (WQS) and guidance values for many specific substances. Waters are classified for their best uses and WQS are set to protect those uses (6 NYCRR Part 703). The data presented below does not meet the minimum data requirements for a confirmed best use assessment^[Best use assessment confirmation is based on 1) whether data are core or supplemental indicators, 2) how many years of data are available, and 3) how many samples were collected. (CALM, 2021)] (CALM, 2021). For the best use assessment, please see [DEC Info Locator](https://gisservices.dec.ny.gov/gis/dil/) and factsheets^[ Compilation of the state’s Integrated Report and updates to WI/PWL ID factsheets occur during even (2022, 2024) years. Best use assessments and factsheets may not immediately reflect data generated in this report.] for individual WI/PWL ID segments (WI/PWL ID `r paste(unique(show_text_pwl),sep=",")`). 
+
+Ambient water chemistry sampling included in-situ and lab measured water quality analytes.  A total of `r length(unique(chem.short$CHEM_PARAMETER_NAME))`   lab-measured and `r length(unique(in.situ.short$CHEM_PARAMETER_NAME))` in-situ water quality parameters were collected. Samples were collected by SMAS using the direct grab method (SOP #210-21, section 11.6). Water samples were sent for processing using a contract lab with NYS Environmental Laboratory Approval Program (ELAP) certification. 
+
+
+```{r, echo=FALSE,warning=FALSE, message=FALSE}
+if(limit_to_nuts){
+  chem.trans$CHEM_PARAMETER_NAME<-stringr::str_to_title(chem.trans$CHEM_PARAMETER_NAME)
+    chem.trans<-chem.trans %>% 
+      filter(CHEM_PARAMETER_NAME=="Nitrogen, Ammonia (As N)"|
+             CHEM_PARAMETER_NAME=="Nitrogen, Kjeldahl, Total"|
+             CHEM_PARAMETER_NAME=="Nitrogen, Nitrate-Nitrite"|
+             CHEM_PARAMETER_NAME=="Nitrogen, Nitrate (As N)"|
+             CHEM_PARAMETER_NAME=="Nitrogen, Nitrite"|
+             CHEM_PARAMETER_NAME=="Nitrogen, Total"|
+             CHEM_PARAMETER_NAME=="Phosphorus, Total (As P)"|
+               CHEM_PARAMETER_NAME=="Phosphorus, Dissolved Orthophosphate (As P)")
+   
+      in.situ.short$CHEM_PARAMETER_NAME<-stringr::str_to_title(in.situ.short$CHEM_PARAMETER_NAME)
+      in.situ.short<-in.situ.short %>% 
+      filter(CHEM_PARAMETER_NAME=="Dissolved Oxygen"|
+               CHEM_PARAMETER_NAME=="Temperature"|
+               CHEM_PARAMETER_NAME=="Ph"|
+               CHEM_PARAMETER_NAME=="Specific Conductance")
+    }
+```
+A total of `r n_distinct(chem.short$CHEM_PARAMETER_NAME)` lab-measured, and `r n_distinct(in.situ.short$CHEM_PARAMETER_NAME)` in-situ water quality analytes were analyzed in this study. Out of the `r nrow(chem.short)` lab-measured records and `r nrow(in.situ.short)` in-situ water quality records, there were `r nrow(temp5)` excursions from established water quality standards (6 NYCRR Part 703). `r if(nrow(temp5 >1)){paste("There were excursions in")}`
+`r if(nrow(temp5 >1)){paste(unique(show_text_ex$combo),sep="; ")}` 
+  `r if(nrow(temp5 >1)){paste(".")}`
+
+`r if(grouping_for_chem=="PWL"){paste("Plots illustrating the range of analyte concentration values within each WI/PWL segments from both mainstem and tributaries, are included below.")}`
+`r if(grouping_for_chem=="site"){paste("Plots illustrating the range of analyte concentration values for each site are included below.")}` `r if(limit_to_nuts){paste("Analytes selected for presentation were subset to those of specific interest to the study and include nitrate, nitrate + nitrite (as N), nitrite (as N), total nitrogen, ammonia, total kjeldahl nitrogen (TKN), total phosphorus, and turbidity, and in-situ parameters: dissolved oxygen, temperature, pH, and specific conductance.")}` 
+`r if(nrow(temp5>0)){paste("Excursions are indicated by an asterisk. Site specific excursions are quantified below.")}`
+
+
+
+```{r tab.id="sites_chem",results = 'asis',warning=FALSE, echo=FALSE,message=FALSE}
+
+sites<-sites.short %>% 
+  arrange(order)
+sites$order<-as.numeric(sites$order)
+#sites$SITE_HISTORY_ID<-fct_reorder(sites$SITE_HISTORY_ID,sites$order)
+
+sites.l<-unique(sites$SITE_HISTORY_ID)
+#add the sites for the FL
+#sites.add<-unique(ext$CHS_EVENT_SMAS_HISTORY_ID)
+#sites.l<-merge(sites.add,sites.l)
+
+ for (i in seq_along(sites.l)) { 
+    #print(i)
+  pwl_sc<-chem_export %>%
+    select(`PWL segment`,Class,Site) %>% 
+    distinct()#use the stayCALM seg ID to limit to class, might need to update, this is only looking at those that went through stayCALM
+  
+  site.loc.small<-pwl_sc[pwl_sc$Site %in% sites.l[i],]
+   
+  stds_small<-unique(site.loc.small$Class)
+  stds_small<-toupper(stds_small)
+  site<-unique(site.loc.small$Site)
+  
+  pwl_small<-unique(site.loc.small$`PWL segment`)
+  #site.loc.small<-sites[sites$SITE_HISTORY_ID %in% sites.l[i],]
+   
+   
+   cat("  \n\n###  ",paste(sites.l[i]), "| Waterbody Class:",stds_small,"| WI/PWL ID:",pwl_small)
+   cat("  \n")
+   cat("<br><br>")
+
+
+   #map.me(sites,site.loc.small)
+   
+  temp.stds<-wqs_table %>% 
+    filter(Class==stds_small) %>% 
+    distinct()
+  
+  list.params<-raw_df_export[raw_df_export$site_id %in% sites.l[i],]
+  list.params$parameter<-stringr::str_to_title(list.params$parameter)
+  
+  list.params.l<-unique(list.params$parameter)
+  
+  temp.stds<-temp.stds %>% 
+    subset(Parameter %in% list.params.l)
+  temp.stds<-temp.stds %>% 
+    mutate(Parameter=case_when(Parameter=="Ph"~"pH",
+                               Parameter=="Dissolved_oxygen"~"Dissolved Oxygen",
+                               Parameter=="Nitrate_nitrite"~"Nitrate-nitrite",
+                               TRUE~paste(Parameter)))
+  
+  label=paste("Applicable Standards:",sites.l[i])
+  tab.cap=paste(label)
+  tab<-table.f(temp.stds,2,max(ncol(temp.stds)))
+  #label=paste("Applicable Standards:",sites.l[i])
+  tab<-flextable::set_caption(tab,tab.cap,style="Table Caption",autonum = run_autonum(seq_id = "tab",prop=officer::fp_text_lite(bold = FALSE)))
+  tab<-flextable::border_outer(tab, part = "all")
+ # tab<-tab %>% 
+    #flextable::width(j=NULL,3)
+  #flextable::fit_to_width(tab,max_width = 3) 
+  flextable::autofit(tab)
+  flextable::flextable_to_rmd(tab)
+  
+  rm(temp)
+  rm(tab.label)
+   cat("  \n")
+   cat("<br><br>")
+  
+  temp <-chemistry_section2[chemistry_section2$Site %in% sites.l[i], ]
+  temp$Site<-NULL
+  temp$Parameter<-stringr::str_to_title(temp$Parameter)
+  temp_high<-high[high$Site %in% sites.l[i], ]
+
+  if(max(temp$`Record Count`)<= 1){
+    temp<-temp %>% 
+      select(-c(Median,Max,Min)) %>% 
+      rename(Result=Mean)
+  }
+  
+    if(max(temp_high$`Record Count`)<= 1){
+    temp_high<-temp_high %>% 
+      select(-c(Median,Max,Min)) %>% 
+      rename(Result=Mean)
+  }
+  
+ if (nrow(temp) > 0){ 
+   label=paste("Chemistry Measurements:",sites.l[i])
+   tab.cap=paste(label)
+   tab1<-table.f(temp, 2,max(ncol(temp)))
+  #label=paste("Chemistry Measurements:",sites.l[i])
+  tab1<-flextable::set_caption(tab1,tab.cap,style="Table Caption",autonum = run_autonum(seq_id = "tab",prop=officer::fp_text_lite(bold = FALSE)))
+ # flextable::fit_to_width(tab1,max_width = 3) 
+  tab1<-flextable::border_outer(tab1, part = "all")
+  flextable::flextable_to_rmd(tab1)
+   rm(temp)
+   cat("  \n")
+   cat("<br><br>")
+ }
+
+if(nrow(temp_high)>0) {
+  label=paste("Chemistry Measurements at Event Flow (high flow):",sites.l[i])
+   tab.cap=paste(label)
+   tab1<-table.f(temp_high, 2,max(ncol(temp_high)))
+  #label=paste("Chemistry Measurements:",sites.l[i])
+  tab1<-flextable::set_caption(tab1,tab.cap,style="Table Caption",autonum = run_autonum(seq_id = "tab",prop=officer::fp_text_lite(bold = FALSE)))
+  #flextable::fit_to_width(tab1,max_width = 3) 
+  tab1<-flextable::border_outer(tab1, part = "all")
+  flextable::flextable_to_rmd(tab1)
+   rm(temp_high)
+   cat("  \n")
+   cat("<br><br>")
+}  
+
+   temp <-field[field$Site %in% sites.l[i], ]
+   temp$Site<-NULL
+   
+     if(max(temp$`Record Count`)<= 1){
+    temp<-temp %>% 
+      select(-c(Median,Max,Min)) %>% 
+      rename(Result=Mean)
+     }
+   
+  temp$Parameter<-stringr::str_to_title(temp$Parameter)
+   temp<-temp %>% 
+    mutate(Parameter=case_when(Parameter=="Ph"~"pH",
+                               TRUE~paste(Parameter)))
+  
+   if (nrow(temp) > 0){ tab1<-table.f(temp, 2,max(ncol(temp)))
+  label=paste("In-Situ Measurements:",sites.l[i])
+  tab.cap=paste(label)
+  tab1<-flextable::set_caption(tab1,tab.cap,style="Table Caption",autonum = run_autonum(seq_id = "tab",prop=officer::fp_text_lite(bold = FALSE)))
+  #flextable::fit_to_width(tab1,max_width = 3) 
+  tab1<-flextable::border_outer(tab1, part = "all")
+   flextable::flextable_to_rmd(tab1)}
+
+   rm(temp)
+   cat("  \n")
+   cat("<br><br>")
+   
+   temp<-viol_small[viol_small$site_id %in% sites.l[i],]
+   temp<-temp %>% 
+     select(!c(site_id,seg_id,statistic,sample_count,sample_count,use))
+   temp<-temp %>% 
+     distinct() #take out the repeats
+ 
+     temp<-temp %>% 
+       rename(Date=date,
+              Parameter=parameter,
+              Result=result,
+              Fraction=fraction,
+              Units=units,
+              Threshold=threshold,
+              Excursion=attaining_wqs)
+      temp<-temp %>% 
+        mutate(Excursion=case_when(Excursion=="no"~"Excursion",
+                                   TRUE~"No Excursion"))
+
+     temp<-temp %>% 
+       filter(Excursion=="Excursion") %>% 
+       select(!Excursion)#filter to just the violations and then remove that column
+     
+     temp$Parameter<-stringr::str_to_title(temp$Parameter)
+     temp<-temp %>% 
+    mutate(Parameter=case_when(Parameter=="Ph"~"pH",
+                               Parameter=="Dissolved_oxygen"~"Dissolved oxygen",
+                               TRUE~paste(Parameter)),
+           Units=case_when(Units=="ph units"~"pH units",
+                           TRUE~paste(Units)))
+  if (nrow(temp) > 0){ 
+     tab3<-table.f(temp,2,4)
+   label=paste("Water Quality Standard Excursions:",sites.l[i])
+   tab.cap=paste(label)
+   tab3<-flextable::set_caption(tab3,tab.cap,style="Table Caption",autonum = run_autonum(seq_id = "tab",prop=officer::fp_text_lite(bold = FALSE)))
+   tab3<-flextable::border_outer(tab3, part = "all")
+   #flextable::fit_to_width(tab3,max_width = 3) 
+   flextable::flextable_to_rmd(tab3)}
+   else{
+       cat("  \n\n *Water Quality Standard Excursions*")
+     cat("  \n\n There were no water quality standard excursions at this site during the sampling period.")
+   }
+   rm(temp)
+     cat(rep("\n"))
+   cat("<br><br>")
+   
+  #temp <-nnc_sum.df[nnc_sum.df$SITE_ID %in% sites.l[i], ]
+  #temp$SITE_ID<-NULL
+   #if (nrow(temp) > 0){tab4<-table.f(temp, 2,4)
+   #label=paste("Numeric Nutrient Criteria:",sites.l[i])
+   #tab4<-flextable::set_caption(tab4,label)
+   #flextable::docx_value(tab4)}
+   #rm(temp)
+   #cat("  \n")
+   #cat("<br><br>")
+  if(bap){
+  temp<-bap.df[bap.df$MSSIH_EVENT_SMAS_HISTORY_ID %in% sites.l[i], ]
+  temp$MSSIH_EVENT_SMAS_HISTORY_ID<-NULL
+  if (nrow(temp) > 0){
+  tab6<-table.f(temp,1,2)
+  label=paste("Biological Assessment Score (BAP) Summary: ",sites.l[i])
+  tab.cap=paste(label)
+  tab6<-flextable::set_caption(tab6,tab.cap,style="Table Caption",autonum = run_autonum(seq_id = "tab",prop=officer::fp_text_lite(bold = FALSE)))
+  tab6<-flextable::border_outer(tab6, part = "all")
+  flextable::flextable_to_rmd(tab6)}
+  rm(temp)
+  cat("  \n")
+  cat("<br><br>")
+  }
+  
+  temp<-flow[flow$SEIH_EVENT_SMAS_HISTORY_ID%in% sites.l[i], ]
+      temp<-temp %>% 
+      filter(SEIH_TOTAL_DISCH>0)
+      
+  if (nrow(temp) > 0) {
+    library(ggplot2)
+ 
+    tab5<-ggplot(temp,aes(SEIH_EVENT_SMAS_SAMPLE_DATE,SEIH_TOTAL_DISCH)) +
+      geom_point()+
+        ylab("cfs")+
+      xlab("Discharge measured in cubic feet per second (cfs).")+
+      scale_x_date(date_labels = "%b %Y")
+    print(tab5)
+    rm(temp)
+  }
+
+
+  cat("  \n")
+  
+ }
+
+    # create plot for each PWL in df 
+    
+```
+
+## BAP Scores
+
+Biological assessments based on the macroinvertebrate community provide the ability to detect water quality problems that are intermittent, not detected, and/or underestimated by water chemistry sampling alone. BAP results are presented below.
+
+
+```{r text,echo=FALSE, message=FALSE, warning=FALSE}
+
+#bap.graph.pwl(sum.metrics2)
+show.text<-if(nrow(bap5) == 0){
+    paste("No segments fell below a mean BAP score of 5 for the study period.")
+}else{
+    paste("Several segments had mean BAP scores below 5, including: ",unique(bap5$SITE_PWL_ID),sep=",")
+}
+
+show.text2<-if(nrow(bap.inc)==0){
+  paste("None of the segments had a mean BAP score that would suggest inconclusive results")
+}else{
+  paste("Also ninety-five percent confidence intervals suggest inconclusive results for segments",unique(bap.inc$SITE_PWL_ID),sep = ",")
+}
+
+#set the group colors
+##set group colors
+sites<-sites %>% 
+  arrange(order)
+
+#sites$group<-levels(with(sites,reorder(group,order)))
+
+groups<-unique(sites$group)
+
+group_colors <- setNames(RColorBrewer::brewer.pal(length(unique(sites$group)), "Set1"), levels(sites$group))
+
+names(group_colors)<-c(groups)
+
+group_colors <- group_colors[!is.na(names(group_colors))] 
+
+
+```
+
+
+
+```{r BAP, message=FALSE, warning=FALSE, echo=FALSE, fig.cap="Biological Assessment Profile (BAP) Scores and 95% confidence intervals for benthic macroinvertebrate community assessment data. Symbology corresponds with WI/PWL segmentation as indicated in the plot legend."}
+
+ if(grouping_for_bap=="site"&nrow(sum.metrics)>1){
+   bap.graph(sum.metrics)}
+
+if(grouping_for_bap=="PWL"&nrow(sum.metrics2)>1){bap.graph.pwl(sum.metrics2)}
+
+if(grouping_for_bap=="both"& nrow(sum.metrics)>1){bap.graph(sum.metrics)}
+ 
+
+
+
+```
+
+```{r BAP2, message=FALSE, warning=FALSE, echo=FALSE, fig.cap="Biological Assessment Profile (BAP) Scores and 95% confidence intervals for benthic macroinvertebrate community assessment data. Symbology corresponds with segmentation as indicated in the plot legend."}
+
+
+if(grouping_for_bap=="both"& nrow(sum.metrics2)>1){bap.graph.pwl(sum.metrics2)}
+
+```
+
+## Chemistry Figures
+
+
+```{r include=FALSE,message=FALSE,warning=FALSE}
+
+#load libraries
+library(stringr)
+library(reshape2)
+library(ggplot2)
+library(ggthemes)
+library(pander)
+library(dplyr)
+library(forcats)
+
+#set group colors
+sites<-sites %>% 
+  arrange(order)
+
+#sites$group<-levels(with(sites,reorder(group,order)))
+sites$group<-as.character(sites$group)
+  
+groups<-as.character(unique(sites$group))
+
+group_colors <- setNames(RColorBrewer::brewer.pal(length(unique(sites$group)), "Set1"), levels(length(unique(sites$group))))
+
+names(group_colors)<-c(groups)
+
+group_colors <- group_colors[!is.na(names(group_colors))] 
+
+#group_colors<-c("downstream"= "tomato2", "upstream"= "springgreen4")#, "c"="deepskyblue2")
+#group_colors<-c("a"= "tomato2", "b"= "springgreen4", "c"="deepskyblue2")
+chem.trans<-chem.trans %>% 
+  arrange(CHEM_PARAMETER_NAME)
+```
+
+
+```{r chemgraph1, echo=FALSE,fig.align='center', message=FALSE, warning=FALSE, fig.cap=paste(unique(chem.trans$CHEM_PARAMETER_NAME), label, sep=": ")}
+  
+
+if(nrow(chem.trans)>1 & grouping_for_chem=="site"){
+
+    label="Stars at the bottom of the graph indicate a violation of a WQS (if applicable). Axis are presented in log scale for comparison.The total number of reported values illustrated for each sampling location can vary due to non-detection and QA/QC procedures.Color corresponds to watershed group indicated in legend. Yellow dots (if included) indicate samples taken at event flow rates."
+chem.graph.site(chem.trans)
+    }
+
+if(nrow(chem.trans)>1 & grouping_for_chem=="PWL"){
+    label="Stars at the bottom of the graph indicate a violation of a WQS (if applicable). Axis are presented in log scale for comparison.The total number of reported values illustrated for each sampling location can vary due to non-detection and QA/QC procedures. Color corresponds to watershed group indicated in legend. Yellow dots (if included) indicate samples taken at event flow rates."
+ 
+  chem.graph.pwl(chem.trans)
+ 
+}
+
+
+```
+
+
+```{r turb, echo=FALSE, fig.align='center',message=FALSE, warning=FALSE, fig.cap=paste(unique(chem.no.trans$CHEM_PARAMETER_NAME), label, sep=": ")}
+
+#this one for the other values (no transformation of units-in situ data)
+ 
+if (nrow(chem.no.trans)>0 & grouping_for_chem=="site"){
+  chem.graph.continuous.site(chem.no.trans)
+}
+
+
+if (nrow(chem.no.trans)>0 & grouping_for_chem=="PWL"){
+  chem.graph.continuous.pwl(chem.no.trans)
+}
+```
+
+
+
+```{r insituChem, echo=FALSE, fig.align='center',message=FALSE, warning=FALSE, fig.cap=paste(unique(in.situ.short$CHEM_PARAMETER_NAME), label, sep=": ")}
+
+#this one for the other values (no transformation of units-in situ data)
+ 
+
+
+if (nrow(in.situ.short)>0 & grouping_for_chem=="site"){
+  chem.graph.insitu.site(in.situ.short)
+}
+
+if (nrow(in.situ.short)>0 & grouping_for_chem=="PWL"){
+  chem.graph.insitu.pwl(in.situ.short)
+}
+
+
+```

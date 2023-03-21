@@ -34,8 +34,8 @@ sites_path <- file.path(
   "Cleaned Files",
   "Final_Sites_ITS"
 )
-# Get the file paths for the filenames with the prefix "MASTER" and
-# extension CSV.
+# # Get the file paths for the filenames with the prefix "MASTER" and
+# # extension CSV.
 sites_csv_list <- list.files(
   path = sites_path,
   pattern = "Master(.+?)csv",
@@ -58,15 +58,18 @@ sites_raw_list <- lapply(sites_csv_list, function(file_i) {
     stringsAsFactors = FALSE,
     fileEncoding = "UTF-8-BOM"
   )})
+# SBU.sites<-read.csv("C:/Users/kareynol/New York State Office of Information Technology Services/SMAS - Streams Data Modernization/Cleaned Files/Final_Sites_ITS/Master_S_Site_v2_created_2021_12_07.csv",
+#                     fileEncoding = "UTF-8-BOM")
+
 SBU.sites<-sites_raw_list$SBU.sites
 
 SBU.sites<-SBU.sites %>%
   rename(SITE_WATER_QLTY_STANDARD=SITE_WQ_STANDARD)
 
-#__________________________________________________________________________
-##FOR FINGER LAKES DATA
-#SBU.sites<-readxl::read_excel(here::here("data/sites_master_for_fl.xlsx"))
-#__________________________________________________________________________
+# #__________________________________________________________________________
+# ##FOR FINGER LAKES DATA
+# SBU.sites<-readxl::read_excel(here::here("data/sites_master_for_fl.xlsx"))
+# #__________________________________________________________________________
 
 
 ##########################################################
@@ -260,13 +263,21 @@ chem.short<-filter.to.sites(sbu.chem.all,quo(CHS_EVENT_SMAS_HISTORY_ID))
 
 # #######fr Finger Lakes monitoring_______________________________________________________--
 
-# ext<-read.csv(here::here("data/Final_Advanced_MP_External_102221.csv"))
-# chem.short<-plyr::rbind.fill(chem.short, ext)
+ # ext<-read.csv(here::here("data/Final_Advanced_MP_External_102221.csv"))
+ # chem.short<-plyr::rbind.fill(chem.short, ext)
 
 # #_________________________________________________________________________________________--
 
 chem.short<-chem.short %>% 
   subset(CHR_VALIDATOR_QUAL!="R")#remove the rejected samples from the df
+
+# # For finger lakes report -------------------------------------------------
+# chem.short$month<-format(as.Date(chem.short$CHS_EVENT_SMAS_SAMPLE_DATE,"%m/%d/%Y"),"%m")
+# 
+# chem.short<-chem.short %>% 
+#   filter(month<=10)
+# # For finger lakes report -------------------------------------------------
+
 
 #flag the event samples, first by subsetting the field information 
 field.short<-filter.to.sites(SBU.field,quo(SEIH_EVENT_SMAS_HISTORY_ID))
@@ -281,22 +292,29 @@ field.short<-field.short %>%
     SEIH_EVENT_EXTENT=="Severe"~"high",
     TRUE~""
   ))
+# # For finger lakes report -------------------------------------------------
+# field.short$month<-format(as.Date(field.short$SEIH_EVENT_SMAS_SAMPLE_DATE,"%m/%d/%Y"),"%m")
+# 
+# field.short<-field.short %>% 
+#   filter(month<=10)
+# # For finger lakes report -------------------------------------------------
+
 
 #and then by grabbing just what you need
 flow.flags<-field.short %>% 
   select(SEIH_EVENT_SMAS_HISTORY_ID,SEIH_EVENT_SMAS_SAMPLE_DATE,high_flow_flag) %>% 
   distinct()
 
-# #######fr Finger Lakes monitoring_______________________________________________________--
-# flow.flags.2<-ext %>% 
-#   select(CHS_EVENT_SMAS_HISTORY_ID,CHS_EVENT_SMAS_SAMPLE_DATE,high_flow_flag) %>% 
+# # #######fr Finger Lakes monitoring_______________________________________________________--
+# flow.flags.2<-ext %>%
+#   select(CHS_EVENT_SMAS_HISTORY_ID,CHS_EVENT_SMAS_SAMPLE_DATE,high_flow_flag) %>%
 #   rename(SEIH_EVENT_SMAS_HISTORY_ID=CHS_EVENT_SMAS_HISTORY_ID,
 #          SEIH_EVENT_SMAS_SAMPLE_DATE=CHS_EVENT_SMAS_SAMPLE_DATE)
 # 
 # flow.flags<-rbind(flow.flags,flow.flags.2)
-# flow.flags<-flow.flags %>% 
+# flow.flags<-flow.flags %>%
 #   distinct()
-# #######fr Finger Lakes monitoring_______________________________________________________--
+# # #######fr Finger Lakes monitoring_______________________________________________________--
 
 #we'll merge this with chemistry to flag the high flow 
 #correct the dates
@@ -335,6 +353,13 @@ tox.sed.short<-filter.to.sites(SBU.tox.sediment,quo(EVENT_SMAS_ID))
 tox.wat.short<-filter.to.sites(SBU.tox.water,quo(EVENT_SMAS_ID))
 metrics.short<-filter.to.sites(SBU.metrics,quo(MSSIH_EVENT_SMAS_HISTORY_ID))
 in.situ.short<-filter.to.sites(SBU.in.situ.chem,quo(ISWC_EVENT_SMAS_HISTORY_ID))
+
+# For finger lakes report -------------------------------------------------
+in.situ.short$month<-format(as.Date(in.situ.short$ISWC_EVENT_SMAS_SAMPLE_DATE,"%m/%d/%Y"),"%m")
+
+in.situ.short<-in.situ.short %>% 
+  filter(month<=10)
+# For finger lakes report -------------------------------------------------
 
 
 
@@ -382,6 +407,9 @@ select(CHEM_PARAMETER_NAME,CHEM_PARAMETER_FRACTION) %>%
 
 analyte.all<-rbind(chemistry.analytes,in.situ.short_analyte)
 analyte.all$CHEM_PARAMETER_NAME<-toupper(analyte.all$CHEM_PARAMETER_NAME)
+analyte.all$CHEM_PARAMETER_FRACTION<-case_when(
+  is.na(analyte.all$CHEM_PARAMETER_FRACTION)~"",
+  TRUE~analyte.all$CHEM_PARAMETER_FRACTION)
 
 
 #merge w/analyte table to get what was actually sampled
@@ -441,5 +469,3 @@ table1$order<-NULL
 
 table1<-table1 %>% 
   rename("Waterbody \n Classification"=`Waterbody Classification`)
-
-                     

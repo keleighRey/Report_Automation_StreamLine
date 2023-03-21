@@ -15,9 +15,9 @@ sites<-read.csv(here::here("data",sites_file_name),stringsAsFactors = FALSE)
 #read in the SBU tables
 #
 #put the list here name of the file-lapply(read.csv(filepath(csv in the iteration, store into the SBU object)))
-SBU.sites<-read.csv(paste("C:/Users/",user,"/New York State Office of Information Technology Services/SMAS - Streams Data Modernization/Cleaned Files/Final_Sites_ITS/Master_S_Site_v2_created_2021_12_07.csv",sep=""),
+#SBU.sites<-read.csv(paste("C:/Users/",user,"/New York State Office of Information Technology Services/SMAS - Streams Data Modernization/Cleaned Files/Final_Sites_ITS/Master_S_Site_v2_created_2021_12_07.csv",sep=""),
                     fileEncoding="UTF-8-BOM")
-#SBU.sites<-readxl::read_excel(here::here("data/sites_master_for_fl.xlsx"))
+SBU.sites<-readxl::read_excel(here::here("data/sites_master_for_fl.xlsx"))
 SBU.sites<-SBU.sites %>%
   rename(SITE_WATER_QLTY_STANDARD=SITE_WQ_STANDARD)
 
@@ -151,8 +151,8 @@ sites.short<-merge(sites.short,sites,by.x="SITE_HISTORY_ID",by.y="SH_SITE_ID")
 chem.short<-filter.to.sites(sbu.chem.all,quo(CHS_EVENT_SMAS_HISTORY_ID))
 
 # #######fr Finger Lakes monitoring_______________________________________________________--
-# ext<-read.csv(here::here("data/Final_Advanced_MP_External_102221.csv"))
-# chem.short<-plyr::rbind.fill(chem.short, ext)
+ext<-read.csv(here::here("data/Final_Advanced_MP_External_102221.csv"))
+chem.short<-plyr::rbind.fill(chem.short, ext)
 # #_________________________________________________________________________________________--
 
 chem.short<-chem.short %>% 

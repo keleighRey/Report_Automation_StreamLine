@@ -10,27 +10,88 @@ output:
 ```{r echo=FALSE,message=FALSE,warning=FALSE}
 
 contact<-contact %>% 
-  arrange(order)
+  arrange(order) %>% 
+  distinct() %>% 
+  group_by(Site,`Contact Type`) %>% 
+  mutate(mean_site=mean(value,na.rm = TRUE)) %>% 
+  ungroup() %>% 
+  group_by(PWL,`Contact Type`) %>% 
+  mutate(mean_pwl=mean(value,na.rm = TRUE))
 
-plot<-ggplot(contact, aes(x=Site, y=value, fill=`Contact Type`))+
-  geom_bar(position="dodge", width=0.7, na.rm = TRUE, stat = "summary", fun= "mean")+
+contact_count<-contact %>% 
+  group_by(Site) %>% 
+  summarise(n=n())
+
+if(contact_count$n>2){
+  contact_mult<-contact %>% 
+    group_by(Site,`Contact Type`) %>% 
+   mutate(mean=mean(value,na.rm=TRUE),
+          N=n(),
+          sd=sd(value, na.rm = TRUE),
+          se=sd/sqrt(N),
+          ci=qt(1 - ((1 - 0.95) / 2), N - 1) * se)
+  
+  contact_mult_pwl<-contact %>% 
+    group_by(PWL,`Contact Type`) %>% 
+   mutate(mean=mean(value,na.rm=TRUE),
+          N=n(),
+          sd=sd(value, na.rm = TRUE),
+          se=sd/sqrt(N),
+          ci=qt(1 - ((1 - 0.95) / 2), N - 1) * se)
+}
+
+
+plot<-ggplot(contact, aes(x=Site, y=mean_site, fill=`Contact Type`))+
+  geom_bar(position="dodge", width=0.7,stat = "identity")+
   ylab("Mean Observer Ranking")+
   xlab("Site ID")+
   ylim(0,6)+
   scale_fill_grey()+
+  geom_hline(yintercept=3,linetype='dashed', color= 'tomato')+
   ggthemes::theme_pander() +
       theme(axis.text.x = element_text(angle = 60, hjust = 1))+
       theme(legend.position="right")
 
-plot2<-ggplot(contact, aes(x=PWL, y=value, fill=`Contact Type`))+
-  geom_bar(position="dodge", width=0.7, na.rm = TRUE, stat = "summary", fun= "mean")+
+if(contact_count$n>2){
+  plot<-ggplot(contact_mult, aes(x=Site, y=mean_site, fill=`Contact Type`))+
+  geom_bar(position="dodge", width=0.7,stat = "identity")+
+ geom_errorbar(aes(ymin=mean_site-ci, ymax=mean_site+ci), position = "dodge", width=.5)+
+  ylab("Mean Observer Ranking")+
+  xlab("Site ID")+
+  #ylim(-5,6)+
+  scale_fill_grey()+
+  geom_hline(yintercept=3,linetype='dashed', color= 'tomato')+
+  ggthemes::theme_pander() +
+      theme(axis.text.x = element_text(angle = 60, hjust = 1))+
+      theme(legend.position="right")
+plot
+}
+
+plot2<-ggplot(contact, aes(x=PWL, y=mean_pwl, fill=`Contact Type`))+
+  geom_bar(position="dodge", width=0.7,stat = "identity")+
   ylab("Mean Observer Ranking")+
   xlab("PWL ID")+
   ylim(0,6)+
   scale_fill_grey()+
+  geom_hline(yintercept=3,linetype='dashed', color= 'tomato')+
   ggthemes::theme_pander() +
       theme(axis.text.x = element_text(angle = 60, hjust = 1))+
       theme(legend.position="right")
+
+if(contact_count$n>2){
+  plot2<-ggplot(contact_mult_pwl, aes(x=PWL, y=mean_pwl, fill=`Contact Type`))+
+  geom_bar(position="dodge", width=0.7,stat = "identity")+
+  geom_errorbar(aes(ymin=mean_pwl-ci, ymax=mean_pwl+ci),  width=.5)+
+  ylab("Mean Observer Ranking")+
+  xlab("PWL ID")+
+  ylim(0,6)+
+  scale_fill_grey()+
+  geom_hline(yintercept=3,linetype='dashed', color= 'tomato')+
+  ggthemes::theme_pander() +
+      theme(axis.text.x = element_text(angle = 60, hjust = 1))+
+      theme(legend.position="right")
+  plot2
+  }
 
 
 ```
@@ -50,6 +111,8 @@ plot2
 Additional recreational usability questions rank in-stream and stream-side factors on a scale of 0-10 (0 – Best/Natural; 10 Worst/Severe). Those factors are: 1) Water Clarity, 2) Trash, 3) Periphyton, 4) Odor, and 5) Discharge Pipes. These visual and olfactory observations help isolate negative factors influencing the user’s perception of recreational use. Table \@ref(tab:UserP-mean-factor) shows the mean recorded value for these factors at each sampling location and Table \@ref(tab:UserP-dominant-factor) lists the users selection of the most dominant impediment that reduces the observer’s desire to participate in  recreational activities, which can include the factors above, as well as ease of access and proximity to development.
 
 ```{r tab.id="UserP-mean-factor", echo=FALSE, message=FALSE, warning=FALSE}
+Variables<-Variables %>% 
+  distinct()
 final_table<-table.f(Variables,2,2)
 
 final_table<-set_caption(final_table,caption="Mean observer ranked value for factors influencing desire to participate in primary and secondary contact recreation. Factors were ranked on a 10 scale (0 – Best/Natural; 10 Worst/Severe) according to perceived impact on a location. Ranking of recreational ability was performed for all locations during each site visit",style="Table Caption",autonum = run_autonum(seq_id = "tab",prop=officer::fp_text_lite(bold = FALSE)))
@@ -68,7 +131,12 @@ final_table
 
 
 ```{r tab.id="UserP-dominant-factor", message = F, warning = F, echo= F}
+
+Dominant<-Dominant %>% 
+  distinct()
+
 final_table2<-table.f(Dominant,2,2) 
+
 final_table2<-set_caption(final_table2,caption="Most frequently ranked factor influencing observer desire to participate in primary and secondary contact recreation. Factors influencing desire to recreate were ranked and a primary factor influencing the desire to participate in primary and secondary contact recreation was chosen during each site visit. Column values represent the factor selected most frequently at each site.",style="Table Caption",autonum = run_autonum(seq_id = "tab",prop=officer::fp_text_lite(bold = FALSE)))
 
 final_table2<-final_table2 %>% 
